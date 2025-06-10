@@ -21,18 +21,42 @@ export async function connectDB() {
       bufferCommands: false,
     };
 
-    // 确保有MONGODB_URI环境变量
-    const MONGODB_URI = process.env.MONGODB_URI;
+    // 确保有MONGODB_URI环境变量或使用开发环境的默认连接
+    let MONGODB_URI = process.env.MONGODB_URI;
     
     if (!MONGODB_URI) {
-      throw new Error('请在.env文件中定义MONGODB_URI环境变量');
+      if (process.env.NODE_ENV === 'development') {
+        // 使用开发环境的内存数据库
+        console.warn('未找到MONGODB_URI环境变量，使用内存数据库...');
+        
+        // 使用内存数据库或本地连接
+        MONGODB_URI = 'mongodb://localhost:27017/3dnav';
+        
+        // 如果mongoose已经连接，先断开连接
+        if (mongoose.connection.readyState) {
+          await mongoose.disconnect();
+        }
+        
+        // 创建内存数据库连接 
+        cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongoose) => {
+          console.log('成功连接到开发环境数据库');
+          return mongoose;
+        });
+      } else {
+        throw new Error('请在.env文件中定义MONGODB_URI环境变量');
+      }
+    } else {
+      cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongoose) => {
+        return mongoose;
+      });
     }
-
-    cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongoose) => {
-      return mongoose;
-    });
   }
   
-  cached.conn = await cached.promise;
-  return cached.conn;
+  try {
+    cached.conn = await cached.promise;
+    return cached.conn;
+  } catch (error) {
+    console.error('数据库连接失败:', error);
+    throw error;
+  }
 } 

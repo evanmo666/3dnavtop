@@ -1,112 +1,42 @@
-"use client";
+import type { Metadata } from 'next';
+import Link from 'next/link';
+import dynamic from 'next/dynamic';
 
-import { useState } from 'react';
-import { signIn } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
+// 动态导入客户端组件
+const LoginForm = dynamic(() => import('../components/LoginForm'));
+
+export const metadata: Metadata = {
+  title: '3DNav登录',
+  description: '登录到3D设计导航管理系统',
+}
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-  const router = useRouter();
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!email || !password) {
-      setError('Please enter both email and password');
-      return;
-    }
-    
-    try {
-      setLoading(true);
-      setError('');
-      
-      const result = await signIn('credentials', {
-        email,
-        password,
-        redirect: false,
-      });
-      
-      if (result?.error) {
-        setError(result.error);
-        setLoading(false);
-        return;
-      }
-      
-      // 登录成功
-      router.push('/admin');
-      router.refresh();
-    } catch (error: any) {
-      setError(error.message || 'An error occurred during login');
-      setLoading(false);
-    }
-  };
-
   return (
-    <div className="min-h-[80vh] flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <h1 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Sign in to your account
-          </h1>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            Login to access the admin dashboard
-          </p>
+    <div className="flex flex-col min-h-screen bg-gray-50">
+      <header className="py-4 px-6 bg-white shadow-sm">
+        <div className="container mx-auto">
+          <Link href="/" className="text-2xl font-bold text-indigo-600">3D Nav</Link>
         </div>
-        
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="rounded-md shadow-sm -space-y-px">
-            <div>
-              <label htmlFor="email-address" className="sr-only">
-                Email address
-              </label>
-              <input
-                id="email-address"
-                name="email"
-                type="email"
-                autoComplete="email"
-                required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                placeholder="Email address"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </div>
-            <div>
-              <label htmlFor="password" className="sr-only">
-                Password
-              </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                autoComplete="current-password"
-                required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </div>
+      </header>
+      
+      <main className="flex-grow flex items-center justify-center p-6">
+        <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
+          <h1 className="text-2xl font-bold text-center mb-6">管理员登录</h1>
+          <LoginForm />
+          
+          <div className="mt-6 pt-4 border-t border-gray-200">
+            <h2 className="text-sm font-medium text-gray-500 mb-2">调试信息:</h2>
+            <ul className="text-xs text-gray-500 space-y-1">
+              <li>• 默认管理员: admin@3dnav.top</li>
+              <li>• 默认密码: admin123456</li>
+              <li>• 环境: {process.env.NODE_ENV}</li>
+              <li>• MongoDB状态: {process.env.MONGODB_URI ? '已配置' : '未配置'}</li>
+              <li>• NextAuth密钥: {process.env.NEXTAUTH_SECRET ? '已配置' : '未配置'}</li>
+            </ul>
+            <p className="text-xs text-gray-400 mt-2">如遇登录问题，将自动使用内存数据库模式</p>
           </div>
-
-          {error && (
-            <div className="text-red-500 text-sm text-center">{error}</div>
-          )}
-
-          <div>
-            <button
-              type="submit"
-              disabled={loading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {loading ? 'Signing in...' : 'Sign in'}
-            </button>
-          </div>
-        </form>
-      </div>
+        </div>
+      </main>
     </div>
   );
 } 
