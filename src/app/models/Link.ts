@@ -1,7 +1,8 @@
 import mongoose from 'mongoose';
 
 // 链接模型接口
-export interface ILink extends mongoose.Document {
+export interface ILink {
+  _id: string;
   title: string;
   url: string;
   description?: string;
