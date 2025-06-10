@@ -4,6 +4,7 @@ import "./globals.css";
 import { Header } from "./components/ui/Header";
 import { Footer } from "./components/ui/Footer";
 import { Providers } from "./providers";
+import Script from "next/script";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -47,6 +48,20 @@ export default function RootLayout({
     <html lang="en">
       <head>
         <link rel="canonical" href="https://3dnav.top" />
+        {/* Google Analytics */}
+        <Script
+          async
+          src="https://www.googletagmanager.com/gtag/js?id=G-49YKL1MW8H"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-49YKL1MW8H');
+          `}
+        </Script>
       </head>
       <body className={`${inter.className} min-h-screen flex flex-col bg-gray-50`}>
         <Providers>
