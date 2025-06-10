@@ -46,8 +46,8 @@ export async function POST(req: NextRequest) {
           success: false, 
           message: '管理员账号已存在',
           admin: {
-            email: adminExists.email,
-            name: adminExists.name
+            name: adminExists.name,
+            role: adminExists.role
           }
         }, { status: 400 });
       }
@@ -79,15 +79,15 @@ export async function POST(req: NextRequest) {
       });
     }
     
+    // 打印日志但不在响应中返回敏感信息
+    console.log(`管理员账号创建成功: ${adminEmail}`);
+    
     return NextResponse.json({ 
       success: true, 
       message: '管理员账号创建成功',
       data: {
-        email: adminUser.email,
         name: adminUser.name,
-        role: adminUser.role,
-        // 仅在开发环境下返回明文密码
-        password: isDev ? adminPassword : undefined
+        role: adminUser.role
       }
     }, { status: 201 });
     

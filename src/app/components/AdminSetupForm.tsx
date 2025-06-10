@@ -41,11 +41,10 @@ export default function AdminSetupForm() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-lg font-medium text-gray-900">默认管理员信息</h2>
+        <h2 className="text-lg font-medium text-gray-900">管理员账户初始化</h2>
         <div className="mt-2 space-y-2 text-sm text-gray-500">
-          <p>邮箱: admin@3dnav.top</p>
-          <p>密码: admin123456</p>
-          <p className="text-red-500 font-medium">请成功创建后立即登录并修改默认密码！</p>
+          <p>点击下方按钮创建默认管理员账户</p>
+          <p className="text-red-500 font-medium">初始化成功后请立即登录并修改默认密码！</p>
         </div>
       </div>
       
@@ -58,17 +57,23 @@ export default function AdminSetupForm() {
           {/* 显示管理员信息 */}
           {result.success && result.data && (
             <div className="mt-2 text-sm text-gray-600">
-              <p>邮箱: {result.data.email}</p>
-              {result.data.password && (
-                <p className="text-red-600 font-medium">密码: {result.data.password}</p>
-              )}
+              <p>管理员账户创建成功</p>
+              <p>现在可以使用默认账户登录系统</p>
+              <div className="mt-2">
+                <Link 
+                  href="/login" 
+                  className="text-sm font-medium text-indigo-600 hover:text-indigo-500"
+                >
+                  前往登录页面 &rarr;
+                </Link>
+              </div>
             </div>
           )}
           
           {/* 已存在管理员账号 */}
           {!result.success && result.admin && (
             <div className="mt-2 text-sm text-gray-600">
-              <p>现有管理员邮箱: {result.admin.email}</p>
+              <p>已存在管理员账户</p>
               <div className="mt-2 flex items-center">
                 <input
                   id="force-create"
@@ -79,21 +84,9 @@ export default function AdminSetupForm() {
                   onChange={(e) => setForceCreate(e.target.checked)}
                 />
                 <label htmlFor="force-create" className="ml-2 block text-sm text-red-700 font-medium">
-                  强制创建新管理员账号（将删除现有账号）
+                  强制创建新管理员账户（将删除现有账户）
                 </label>
               </div>
-            </div>
-          )}
-          
-          {/* 登录链接 */}
-          {result.success && (
-            <div className="mt-2">
-              <Link 
-                href="/login" 
-                className="text-sm font-medium text-indigo-600 hover:text-indigo-500"
-              >
-                前往登录页面 &rarr;
-              </Link>
             </div>
           )}
         </div>
