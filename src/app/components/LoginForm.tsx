@@ -66,7 +66,7 @@ export default function LoginForm() {
       
       if (result?.ok) {
         console.log('登录成功，准备跳转...');
-        router.push('/admin/dashboard');
+        router.push('/admin');
         router.refresh();
       }
     } catch (err: any) {
