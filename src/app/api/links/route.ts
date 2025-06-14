@@ -40,7 +40,7 @@ export async function POST(req: NextRequest) {
     // 检查身份验证
     const session = await getServerSession(authOptions);
     
-    if (!session || session.user.role !== 'admin') {
+    if (!session || !session.user || session.user.role !== 'admin') {
       return NextResponse.json({ error: '未授权' }, { status: 401 });
     }
     

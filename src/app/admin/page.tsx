@@ -23,7 +23,7 @@ export default function AdminDashboard() {
     }
 
     if (status === 'authenticated') {
-      if (session.user.role !== 'admin') {
+      if (!session.user || session.user.role !== 'admin') {
         router.push('/');
         return;
       }
@@ -129,18 +129,14 @@ export default function AdminDashboard() {
           >
             Manage Links
           </Link>
-          <Link 
-            href="/admin/featured" 
-            className="bg-amber-600 hover:bg-amber-700 transition text-white p-4 rounded-lg text-center"
-          >
+          <div className="bg-amber-600 opacity-50 cursor-not-allowed text-white p-4 rounded-lg text-center">
             Edit Featured Links
-          </Link>
-          <Link 
-            href="/admin/users" 
-            className="bg-green-600 hover:bg-green-700 transition text-white p-4 rounded-lg text-center"
-          >
+            <div className="text-xs mt-1">(Coming Soon)</div>
+          </div>
+          <div className="bg-green-600 opacity-50 cursor-not-allowed text-white p-4 rounded-lg text-center">
             Manage Users
-          </Link>
+            <div className="text-xs mt-1">(Coming Soon)</div>
+          </div>
         </div>
       </div>
 
@@ -188,8 +184,8 @@ export default function AdminDashboard() {
                   2 days ago
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                  <a href="#" className="text-blue-600 hover:text-blue-900 mr-3">Edit</a>
-                  <a href="#" className="text-red-600 hover:text-red-900">Delete</a>
+                  <Link href="/admin/links" className="text-blue-600 hover:text-blue-900 mr-3">Edit</Link>
+                  <span className="text-gray-400 cursor-not-allowed">Delete</span>
                 </td>
               </tr>
               <tr>
@@ -210,8 +206,8 @@ export default function AdminDashboard() {
                   3 days ago
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                  <a href="#" className="text-blue-600 hover:text-blue-900 mr-3">Edit</a>
-                  <a href="#" className="text-red-600 hover:text-red-900">Delete</a>
+                  <Link href="/admin/links" className="text-blue-600 hover:text-blue-900 mr-3">Edit</Link>
+                  <span className="text-gray-400 cursor-not-allowed">Delete</span>
                 </td>
               </tr>
             </tbody>

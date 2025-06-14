@@ -146,7 +146,7 @@ export default function LinksPage() {
     }
 
     if (status === 'authenticated') {
-      if (session.user.role !== 'admin') {
+      if (!session.user || session.user.role !== 'admin') {
         router.push('/');
         return;
       }

@@ -32,15 +32,16 @@ export async function connectDB() {
         // 使用内存数据库或本地连接
         MONGODB_URI = 'mongodb://localhost:27017/3dnav';
         
-        // 如果mongoose已经连接，先断开连接
-        if (mongoose.connection.readyState) {
-          await mongoose.disconnect();
-        }
-        
         // 创建内存数据库连接 
         cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongoose) => {
           console.log('成功连接到开发环境数据库');
+          // 标记为内存模式
+          (mongoose as any).memoryMode = true;
           return mongoose;
+        }).catch((error) => {
+          console.warn('MongoDB连接失败，将使用内存数据库模式:', error.message);
+          // 返回一个标记为内存模式的对象
+          return { memoryMode: true };
         });
       } else {
         throw new Error('请在.env文件中定义MONGODB_URI环境变量');

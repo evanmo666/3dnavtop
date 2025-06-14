@@ -25,11 +25,11 @@ export default function LoginPage() {
           <LoginForm />
           
           <div className="mt-6 pt-4 border-t border-gray-200">
-            <h2 className="text-sm font-medium text-gray-500 mb-2">系统信息:</h2>
+            <h2 className="text-sm font-medium text-gray-500 mb-2">帮助信息:</h2>
             <ul className="text-xs text-gray-500 space-y-1">
-              <li>• 环境: {process.env.NODE_ENV}</li>
-              <li>• MongoDB状态: {process.env.MONGODB_URI ? '已配置' : '未配置'}</li>
-              <li>• NextAuth密钥: {process.env.NEXTAUTH_SECRET ? '已配置' : '未配置'}</li>
+              <li>• 默认管理员邮箱: admin@3dnav.top</li>
+              <li>• 默认密码: admin123456</li>
+              <li>• 首次使用请先初始化管理员账户</li>
             </ul>
             <p className="text-xs text-gray-400 mt-2">如遇登录问题，请联系管理员</p>
             <div className="mt-3 text-center">

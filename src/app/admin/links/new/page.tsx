@@ -44,9 +44,26 @@ export default function AddLinkPage() {
     );
   }
 
-  if (status === 'unauthenticated' || (session && session.user.role !== 'admin')) {
+  if (status === 'unauthenticated') {
     router.push('/login');
-    return null;
+    return (
+      <div className="min-h-[80vh] flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-gray-600">Redirecting to login...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!session || !session.user || session.user.role !== 'admin') {
+    router.push('/');
+    return (
+      <div className="min-h-[80vh] flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-gray-600">Access denied. Redirecting...</p>
+        </div>
+      </div>
+    );
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -79,11 +96,12 @@ export default function AddLinkPage() {
         body: JSON.stringify(formData),
       });
       
-      const data = await response.json();
-      
       if (!response.ok) {
-        throw new Error(data.error || 'An error occurred when adding the link');
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
       }
+      
+      const data = await response.json();
       
       setSuccess('Link added successfully!');
       

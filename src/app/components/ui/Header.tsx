@@ -62,7 +62,7 @@ export function Header() {
             </Link>
             {session ? (
               <>
-                {session.user.role === 'admin' && (
+                {session.user && session.user.role === 'admin' && (
                   <Link 
                     href="/admin" 
                     className={`hover:text-blue-200 transition ${pathname.startsWith('/admin') ? 'font-bold' : ''}`}
@@ -114,7 +114,7 @@ export function Header() {
             </Link>
             {session ? (
               <>
-                {session.user.role === 'admin' && (
+                {session.user && session.user.role === 'admin' && (
                   <Link 
                     href="/admin" 
                     className={`block hover:text-blue-200 transition ${pathname.startsWith('/admin') ? 'font-bold' : ''}`}
