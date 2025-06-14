@@ -1,6 +1,7 @@
 "use client";
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 import { useSession, signOut } from 'next-auth/react';
@@ -15,7 +16,14 @@ export function Header() {
       <div className="container mx-auto px-4 py-3">
         <div className="flex justify-between items-center">
           <Link href="/" className="text-2xl font-bold flex items-center">
-            <span className="mr-2">🧊</span> 3DNAV.TOP
+            <Image 
+              src="/LOGO.png" 
+              alt="3DNAV.TOP Logo" 
+              width={32} 
+              height={32} 
+              className="mr-2 rounded"
+            />
+            3DNAV.TOP
           </Link>
           
           {/* 移动端菜单按钮 */}

@@ -15,6 +15,11 @@ export const metadata: Metadata = {
   authors: { name: "3DNAV.TOP" },
   creator: "3DNAV.TOP",
   publisher: "3DNAV.TOP",
+  icons: {
+    icon: '/favicon.ico',
+    shortcut: '/favicon.ico',
+    apple: '/favicon.ico',
+  },
   openGraph: {
     title: "3DNAV.TOP - Ultimate Navigation for 3D Designers",
     description: "Curated resources for Cinema 4D and Blender designers",
