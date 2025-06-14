@@ -85,23 +85,25 @@ export default function Home() {
             Discover the best tools, tutorials, and resources for Cinema 4D and Blender
           </p>
           
-          {/* 搜索栏 */}
+          {/* 搜索栏 - 增强视觉效果 */}
           <div className="max-w-2xl mx-auto">
-            <div className={`relative transition-all duration-300 ${isSearchFocused ? 'scale-105' : ''}`}>
+            <div className={`relative transition-all duration-300 ${isSearchFocused ? 'scale-105 shadow-2xl' : 'shadow-xl'}`}>
               <input
                 type="text"
                 placeholder="Search for resources..."
-                className="w-full px-6 py-4 rounded-full text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-400 shadow-lg"
+                className="w-full px-6 py-5 rounded-full text-gray-800 text-lg font-medium focus:outline-none focus:ring-4 focus:ring-white/30 bg-white/95 backdrop-blur-sm border-2 border-white/20 hover:border-white/40 transition-all duration-300"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 onFocus={() => setIsSearchFocused(true)}
                 onBlur={() => setIsSearchFocused(false)}
               />
-              <div className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              <div className="absolute right-5 top-1/2 transform -translate-y-1/2 text-blue-500">
+                <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
               </div>
+              {/* 搜索框发光效果 */}
+              <div className={`absolute inset-0 rounded-full bg-gradient-to-r from-blue-400/20 to-indigo-400/20 blur-lg transition-opacity duration-300 ${isSearchFocused ? 'opacity-100' : 'opacity-0'}`}></div>
             </div>
           </div>
         </motion.div>
@@ -162,14 +164,14 @@ export default function Home() {
             {/* 特色资源区域 */}
             {!searchTerm && (
               <div className="mb-12">
-                <h2 className="text-2xl font-bold mb-6 pb-2 border-b">Featured Resources</h2>
+                <h2 className="text-2xl font-bold mb-6 pb-2 border-b text-gray-900">Featured Resources</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-                  {featuredLinks.map((link) => (
+                  {featuredLinks.map((link, index) => (
                     <motion.div
                       key={link._id}
-                      initial={{ opacity: 0, y: 20 }}
+                      initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.3, delay: Number(link._id) * 0.05 }}
+                      transition={{ duration: 0.2, delay: index * 0.02 }}
                     >
                       <LinkCard link={link} featured={true} />
                     </motion.div>
@@ -181,19 +183,19 @@ export default function Home() {
             {/* 搜索结果 */}
             {searchTerm && (
               <div className="mb-12">
-                <h2 className="text-2xl font-bold mb-6 pb-2 border-b">
+                <h2 className="text-2xl font-bold mb-6 pb-2 border-b text-gray-900">
                   Search Results for "{searchTerm}"
                 </h2>
                 {filteredLinks.length > 0 ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                     <AnimatePresence>
-                      {filteredLinks.map((link) => (
+                      {filteredLinks.map((link, index) => (
                         <motion.div
                           key={link._id}
-                          initial={{ opacity: 0, scale: 0.9 }}
+                          initial={{ opacity: 0, scale: 0.95 }}
                           animate={{ opacity: 1, scale: 1 }}
-                          exit={{ opacity: 0, scale: 0.9 }}
-                          transition={{ duration: 0.3 }}
+                          exit={{ opacity: 0, scale: 0.95 }}
+                          transition={{ duration: 0.15, delay: index * 0.01 }}
                           layout
                         >
                           <LinkCard link={link} featured={link.featured} />
@@ -222,20 +224,20 @@ export default function Home() {
                 className="mb-12"
                 ref={setCategoryRef(category.id)}
               >
-                <h2 className="text-2xl font-bold mb-6 flex items-center pb-2 border-b" id={`category-${category.id}`}>
+                <h2 className="text-2xl font-bold mb-6 flex items-center pb-2 border-b text-gray-900" id={`category-${category.id}`}>
                   <span className="mr-3 text-2xl">{category.icon}</span>
                   <span>{category.title}</span>
                 </h2>
                 
                 {groupedLinks[category.id]?.length > 0 ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-                    {groupedLinks[category.id].map((link) => (
+                    {groupedLinks[category.id].map((link, index) => (
                       <motion.div
                         key={link._id}
-                        initial={{ opacity: 0 }}
-                        whileInView={{ opacity: 1 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.3 }}
+                        initial={{ opacity: 0, y: 5 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true, margin: "-50px" }}
+                        transition={{ duration: 0.15, delay: index * 0.01 }}
                       >
                         <LinkCard link={link} featured={link.featured} />
                       </motion.div>
