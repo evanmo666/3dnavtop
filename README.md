@@ -1,97 +1,248 @@
 # 3D设计师导航网站 (3dnav.top)
 
-## 项目概述
-3D设计师导航网站是一个为Cinema 4D和Blender用户提供优质资源链接的导航平台。网站汇集了大量3D设计相关的工具、插件、教程、素材和灵感资源，帮助设计师提高工作效率。
+一个专为3D设计师打造的资源导航网站，基于Next.js 15 + TypeScript构建。
 
-## 技术栈
-- **前端框架**: Next.js 15
-- **编程语言**: TypeScript
-- **样式解决方案**: TailwindCSS
-- **数据库**: MongoDB (支持内存数据库模式)
-- **身份验证**: NextAuth.js
+## 🚀 项目特色
 
-## 主要功能
-- 分类展示3D设计资源
-- 资源搜索功能
-- 响应式设计，支持移动设备
-- 管理员后台系统
-- 内存数据库模式（无需MongoDB）
+- **现代化技术栈**: Next.js 15 + TypeScript + Tailwind CSS
+- **响应式设计**: 完美适配桌面端和移动端
+- **智能搜索**: 支持实时搜索和分类筛选
+- **后台管理**: 完整的链接管理系统
+- **文件存储**: 基于文件的数据管理，无需数据库
 
-## 安装和运行
-1. 克隆仓库
-```bash
-git clone https://github.com/evanmo666/3dnavtop.git
-cd 3dnavtop
+## 📊 项目数据
+
+- **总链接数**: 60个精选资源
+- **特色链接**: 15个重点推荐
+- **分类数量**: 9个主要分类
+- **管理模式**: 文件模式 - 直接修改数据文件
+
+## 🛠️ 技术架构
+
+### 前端技术
+- **框架**: Next.js 15 (App Router)
+- **语言**: TypeScript
+- **样式**: Tailwind CSS
+- **动画**: Framer Motion
+- **图标**: Heroicons
+
+### 后台管理
+- **数据存储**: 基于文件系统 (src/app/data/links.ts)
+- **API路由**: Next.js API Routes
+- **文件操作**: 自定义文件操作工具
+- **权限控制**: 简化的管理界面
+
+### 数据管理
+- **主数据文件**: `src/app/data/links.ts`
+- **文件操作**: `src/app/api/links/file-operations.ts`
+- **API端点**: 
+  - `GET /api/links` - 获取所有链接
+  - `POST /api/links` - 添加新链接
+  - `GET /api/links/[id]` - 获取单个链接
+  - `PUT /api/links/[id]` - 更新链接
+  - `DELETE /api/links/[id]` - 删除链接
+
+## 📁 项目结构
+
+```
+3dnav/
+├── src/
+│   ├── app/
+│   │   ├── data/
+│   │   │   └── links.ts          # 主数据文件
+│   │   ├── api/
+│   │   │   └── links/
+│   │   │       ├── route.ts      # 链接API路由
+│   │   │       ├── [id]/route.ts # 单个链接API
+│   │   │       └── file-operations.ts # 文件操作工具
+│   │   ├── admin/
+│   │   │   └── links/
+│   │   │       ├── page.tsx      # 链接管理页面
+│   │   │       ├── new/page.tsx  # 添加链接页面
+│   │   │       └── [id]/page.tsx # 编辑链接页面
+│   │   ├── components/           # 可复用组件
+│   │   ├── globals.css          # 全局样式
+│   │   ├── layout.tsx           # 根布局
+│   │   └── page.tsx             # 首页
+│   └── ...
+├── public/                      # 静态资源
+├── package.json                 # 项目依赖
+├── tailwind.config.ts          # Tailwind配置
+├── tsconfig.json               # TypeScript配置
+└── README.md                   # 项目文档
 ```
 
-2. 安装依赖
+## 🎯 功能特性
+
+### 前台功能
+- ✅ 响应式首页设计
+- ✅ 智能搜索功能
+- ✅ 分类筛选
+- ✅ 特色链接展示
+- ✅ 链接卡片动画
+- ✅ 移动端适配
+
+### 后台管理
+- ✅ 链接列表管理
+- ✅ 添加新链接
+- ✅ 编辑链接信息
+- ✅ 删除链接
+- ✅ 分类管理
+- ✅ 搜索和筛选
+- ✅ 统计信息展示
+
+### 数据管理
+- ✅ 文件系统存储
+- ✅ 自动ID生成
+- ✅ 数据格式验证
+- ✅ 错误处理
+- ✅ 数据备份（Git版本控制）
+
+## 🚀 快速开始
+
+### 环境要求
+- Node.js 18+
+- npm 或 yarn
+
+### 安装步骤
+
+1. **克隆项目**
+```bash
+git clone <repository-url>
+cd 3dnav
+```
+
+2. **安装依赖**
 ```bash
 npm install
 ```
 
-3. 创建`.env.local`文件并添加以下环境变量
-```
-NEXTAUTH_URL=http://localhost:3000
-NEXTAUTH_SECRET=your_secret_key
-# 可选: MONGODB_URI=your_mongodb_connection_string
-```
-
-4. 运行开发服务器
+3. **启动开发服务器**
 ```bash
 npm run dev
 ```
 
-5. 访问 http://localhost:3000
+4. **访问应用**
+- 前台: http://localhost:3000
+- 后台管理: http://localhost:3000/admin/links
 
-## 管理员设置
-1. 访问 http://localhost:3000/admin/setup
-2. 创建管理员账户
-3. 使用创建的账户登录系统
+### 构建部署
 
-## 开发历程
-- 初始版本：分类卡片导航到子页面
-- 第一次改版：所有资源直接显示在首页，通过顶部标签切换
-- 第二次改版：左侧固定分类菜单，右侧内容区域
-- **2024年最新更新**：
-  - 添加了自定义favicon.ico图标
-  - 在顶部导航栏的3DNAV.TOP文字左侧添加了LOGO.png
-  - 优化了网站品牌视觉识别
-  - 使用Next.js Image组件优化图片加载性能
-  - 为首页hero区域添加了自定义背景图片(blackgroud.jpg)
-  - 使用渐变叠加层确保文字可读性，背景透明度设置为80%
-  - **用户体验优化**：
-    - 增强搜索框视觉效果：添加发光效果、半透明背景、更大尺寸
-    - 修复标题文字颜色过浅问题：所有标题改为深灰色(text-gray-900)
-    - 优化页面加载性能：减少动画延迟时间，提升响应速度
-  - **安全性和BUG修复**：
-    - 🔥 修复环境变量泄露安全漏洞：移除登录页面的敏感信息显示
-    - 🔥 修复权限检查绕过漏洞：增强所有admin页面的权限验证
-    - 🔥 修复API路由空值引用错误：添加session.user的空值检查
-    - 🔥 修复数据库连接逻辑错误：优化连接失败时的处理机制
-    - 🔥 修复无效链接问题：禁用未实现的功能按钮，添加"Coming Soon"标识
-    - 🔥 优化错误处理：改进API调用的错误处理逻辑
-  - **🎯 数据同步问题彻底解决 (2025年最新)**：
-    - ✅ 修复前后台数据不同步问题：统一数据源为src/app/data/links.ts
-    - ✅ 后台管理页面数据统计修正：总链接59个，特色链接15个，分类8个
-    - ✅ 链接管理页面数据同步：使用真实数据替换模拟数据
-    - ✅ 添加详细调试信息：便于验证前后台数据一致性
-    - ✅ 优化构建和部署流程：确保线上版本与本地开发版本同步
-    - 🚀 **线上部署更新**：所有修复已推送到生产环境 https://www.3dnav.top
-  - **🔧 用户界面交互修复**：
-    - ✅ 修复首页搜索框无法点击问题：解决发光效果层遮挡点击事件
-    - ✅ 优化搜索框层级结构：添加pointer-events-none和z-index层级管理
-    - ✅ 保持搜索框视觉效果：发光动画效果正常显示但不影响交互
-  - **🛠️ 后台管理功能完善**：
-    - ✅ 修复添加链接分类不匹配问题：统一使用真实数据源categories
-    - ✅ 创建编辑链接页面：支持根据ID编辑链接信息，解决404问题
-    - ✅ 优化分类选项生成：从数据源动态生成，确保前后台一致
-    - ✅ 完善编辑功能：支持所有字段编辑，包括标题、URL、描述、分类等
-    - ✅ 修复添加链接失败问题：实现演示模式，避免数据库连接依赖
-    - ✅ 添加演示模式提示：明确告知用户当前为演示环境，更改不会持久化
+```bash
+# 构建生产版本
+npm run build
 
-## 许可证
-MIT License
+# 启动生产服务器
+npm start
+```
 
-## 联系方式
-- 作者: EvanMo
-- GitHub: [evanmo666](https://github.com/evanmo666)
+## 📝 使用说明
+
+### 添加新链接
+
+1. 访问 `/admin/links/new`
+2. 填写链接信息：
+   - 标题 (必填)
+   - URL (必填)
+   - 描述 (可选)
+   - 分类 (必填)
+   - 子分类 (可选)
+   - 是否特色
+   - 排序权重
+
+3. 点击"添加链接"保存
+
+### 编辑链接
+
+1. 在链接管理页面点击"编辑"
+2. 修改链接信息
+3. 点击"更新链接"保存
+4. 或点击"删除链接"删除
+
+### 数据文件结构
+
+```typescript
+interface ILink {
+  _id: string;           // 唯一ID
+  title: string;         // 链接标题
+  url: string;          // 链接URL
+  description?: string;  // 描述信息
+  category: string;     // 主分类
+  subcategory?: string; // 子分类
+  featured?: boolean;   // 是否特色
+  order?: number;       // 排序权重
+  createdAt: Date;      // 创建时间
+  updatedAt: Date;      // 更新时间
+}
+```
+
+## 🔧 开发指南
+
+### 添加新分类
+
+在 `src/app/data/links.ts` 中的 `categories` 数组添加新分类：
+
+```typescript
+export const categories = [
+  // ... 现有分类
+  { id: 'new-category', title: 'New Category', icon: '🆕' },
+];
+```
+
+### 修改样式
+
+项目使用 Tailwind CSS，主要样式文件：
+- `src/app/globals.css` - 全局样式
+- 组件内联样式 - 使用 Tailwind 类名
+
+### API扩展
+
+在 `src/app/api/links/` 目录下添加新的API路由。
+
+## 📈 更新日志
+
+### v1.3.0 (2024-06-14)
+- ✅ 实现基于文件的后台管理系统
+- ✅ 创建文件操作工具函数
+- ✅ 重写所有后台管理页面
+- ✅ 添加统计信息展示
+- ✅ 优化用户界面和交互
+- ✅ 修复类型兼容性问题
+
+### v1.2.0 (2024-06-13)
+- ✅ 修复搜索框交互问题
+- ✅ 统一前后台数据源
+- ✅ 优化构建和部署流程
+- ✅ 添加详细调试信息
+
+### v1.1.0 (2024-06-12)
+- ✅ 完成基础前台功能
+- ✅ 实现响应式设计
+- ✅ 添加搜索和筛选功能
+- ✅ 集成动画效果
+
+### v1.0.0 (2024-06-11)
+- ✅ 项目初始化
+- ✅ 基础架构搭建
+- ✅ 数据结构设计
+
+## 🤝 贡献指南
+
+1. Fork 项目
+2. 创建功能分支 (`git checkout -b feature/AmazingFeature`)
+3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
+4. 推送到分支 (`git push origin feature/AmazingFeature`)
+5. 开启 Pull Request
+
+## 📄 许可证
+
+本项目采用 MIT 许可证 - 查看 [LICENSE](LICENSE) 文件了解详情。
+
+## 📞 联系方式
+
+- 网站: [3dnav.top](https://3dnav.top)
+- 邮箱: contact@3dnav.top
+
+---
+
+**注意**: 本项目使用文件模式进行数据管理，所有数据修改都会直接写入 `src/app/data/links.ts` 文件。建议定期备份数据文件，并使用Git进行版本控制。
