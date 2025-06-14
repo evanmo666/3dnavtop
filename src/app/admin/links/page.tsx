@@ -74,7 +74,7 @@ export default function LinksManagementPage() {
       const result = await response.json();
 
       if (result.success) {
-        alert('链接删除成功！页面将刷新以显示最新数据。');
+        alert(result.message || '链接删除成功！');
         // 刷新页面以显示最新数据
         window.location.reload();
       } else {
@@ -116,8 +116,8 @@ export default function LinksManagementPage() {
         <div>
           <h1 className="text-3xl font-bold mb-2">链接管理</h1>
           <p className="text-gray-600">管理3D设计导航网站的所有链接资源</p>
-          <div className="mt-2 px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-md inline-block">
-            📁 文件模式 - 直接修改数据文件
+          <div className="mt-2 px-3 py-1 bg-yellow-100 text-yellow-800 text-sm rounded-md inline-block">
+            🎭 演示模式 - 重启后数据会恢复
           </div>
         </div>
         <Link 

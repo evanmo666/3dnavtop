@@ -1,22 +1,17 @@
-"use client";
+"use client"
 
-import { useState, useEffect } from 'react';
-import { useRouter, useParams } from 'next/navigation';
-import { useSession } from 'next-auth/react';
-import Link from 'next/link';
-import { allLinks, categories as dataCategories } from '../../../data/links';
+import { useState, useEffect } from "react"
+import { useRouter, useParams } from "next/navigation"
+import Link from "next/link"
+import { categories, allLinks } from "@/app/data/links"
 
 export default function EditLinkPage() {
-  const { data: session, status } = useSession();
-  const router = useRouter();
-  const params = useParams();
-  const linkId = params.id as string;
+  const router = useRouter()
+  const params = useParams()
+  const linkId = params.id as string
   
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
-  const [linkFound, setLinkFound] = useState(false);
-  
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState('')
   const [formData, setFormData] = useState({
     title: '',
     url: '',
@@ -25,219 +20,129 @@ export default function EditLinkPage() {
     subcategory: '',
     featured: false,
     order: 0
-  });
+  })
 
-  // 从真实数据源生成分类选项（排除'all'分类）
-  const categories = dataCategories.slice(1).map(cat => ({
-    value: cat.id,
-    label: cat.title
-  }));
-
-  // 加载链接数据
+  // 从静态数据中获取链接信息
   useEffect(() => {
-    if (linkId) {
-      const link = allLinks.find(l => l._id === linkId);
-      if (link) {
-        setFormData({
-          title: link.title,
-          url: link.url,
-          description: link.description || '',
-          category: link.category,
-          subcategory: link.subcategory || '',
-          featured: link.featured || false,
-          order: link.order || 0
-        });
-        setLinkFound(true);
-        console.log('加载链接数据:', link);
-      } else {
-        setError('Link not found');
-        setLinkFound(false);
-      }
+    const link = allLinks.find(l => l._id === linkId)
+    if (link) {
+      setFormData({
+        title: link.title,
+        url: link.url,
+        description: link.description || '',
+        category: link.category,
+        subcategory: link.subcategory || '',
+        featured: link.featured || false,
+        order: link.order || 0
+      })
+    } else {
+      setError('链接不存在')
     }
-  }, [linkId]);
-
-  // 权限检查
-  if (status === 'loading') {
-    return (
-      <div className="min-h-[80vh] flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (status === 'unauthenticated') {
-    router.push('/login');
-    return (
-      <div className="min-h-[80vh] flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-gray-600">Redirecting to login...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!session || !session.user || session.user.role !== 'admin') {
-    router.push('/');
-    return (
-      <div className="min-h-[80vh] flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-gray-600">Access denied. Redirecting...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!linkFound && !error) {
-    return (
-      <div className="min-h-[80vh] flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading link data...</p>
-        </div>
-      </div>
-    );
-  }
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value, type } = e.target as HTMLInputElement;
-    
-    setFormData({
-      ...formData,
-      [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value
-    });
-  };
+  }, [linkId])
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!formData.title || !formData.url || !formData.category) {
-      setError('Please fill in all required fields.');
-      return;
-    }
-    
+    e.preventDefault()
+    setIsLoading(true)
+    setError('')
+
     try {
-      setLoading(true);
-      setError('');
-      
-      // 调用真实API更新链接
       const response = await fetch(`/api/links/${linkId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(formData),
-      });
-      
-      const result = await response.json();
+      })
+
+      const result = await response.json()
 
       if (result.success) {
-        setSuccess('Link updated successfully!');
-        setTimeout(() => {
-          router.push('/admin/links');
-        }, 3000);
+        alert(result.message || '链接更新成功！')
+        router.push('/admin/links')
       } else {
-        setError(result.error || 'Update failed');
+        setError(`更新失败: ${result.error}`)
       }
-    } catch (error: any) {
-      console.error('Update link failed:', error);
-      setError('Update link failed, please try again');
+    } catch (error) {
+      console.error('更新链接失败:', error)
+      setError('更新链接失败，请重试')
     } finally {
-      setLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value, type } = e.target
+    setFormData(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value
+    }))
+  }
 
   const handleDelete = async () => {
-    if (!confirm('Are you sure you want to delete this link? This operation cannot be undone.')) {
-      return;
+    if (!confirm('确定要删除这个链接吗？此操作不可撤销。')) {
+      return
     }
 
-    setLoading(true);
+    setIsLoading(true)
     try {
       const response = await fetch(`/api/links/${linkId}`, {
         method: 'DELETE',
-      });
+      })
 
-      const result = await response.json();
+      const result = await response.json()
 
       if (result.success) {
-        setSuccess('Link deleted successfully!');
-        setTimeout(() => {
-          router.push('/admin/links');
-        }, 3000);
+        alert(result.message || '链接删除成功！')
+        router.push('/admin/links')
       } else {
-        setError(result.error || 'Delete failed');
+        setError(`删除失败: ${result.error}`)
       }
     } catch (error) {
-      console.error('Delete link failed:', error);
-      setError('Delete link failed, please try again');
+      console.error('删除链接失败:', error)
+      setError('删除链接失败，请重试')
     } finally {
-      setLoading(false);
+      setIsLoading(false)
     }
-  };
-
-  if (error && !linkFound) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="mb-8 flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-bold mb-2">Edit Link</h1>
-            <p className="text-gray-600">Link not found</p>
-          </div>
-          <Link 
-            href="/admin/links" 
-            className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md transition"
-          >
-            Back to Links
-          </Link>
-        </div>
-        
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-          {error}
-        </div>
-      </div>
-    );
   }
+
+  // 过滤掉'all'分类，只显示实际分类
+  const availableCategories = categories.filter(cat => cat.id !== 'all')
 
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="max-w-2xl mx-auto">
+        {/* 头部导航 */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold mb-2">Edit Link</h1>
-            <p className="text-gray-600">Update resource information</p>
-            <div className="mt-2 px-3 py-1 bg-green-100 text-green-800 text-sm rounded-md inline-block">
-              📁 Database Mode - Changes will be saved permanently
+            <h1 className="text-3xl font-bold mb-2">编辑链接</h1>
+            <p className="text-gray-600">修改链接信息</p>
+            <div className="mt-2 px-3 py-1 bg-yellow-100 text-yellow-800 text-sm rounded-md inline-block">
+              🎭 演示模式 - 重启后数据会恢复
             </div>
           </div>
           <Link 
             href="/admin/links" 
             className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md transition"
           >
-            Back to Links
+            返回链接管理
           </Link>
         </div>
-        
+
+        {/* 错误提示 */}
         {error && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
             {error}
           </div>
         )}
-        
-        {success && (
-          <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-6">
-            {success}
-          </div>
-        )}
-        
+
+        {/* 表单 */}
         <div className="bg-white rounded-lg shadow p-6">
           <form onSubmit={handleSubmit} className="space-y-6">
+            {/* 基本信息 */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="col-span-1 md:col-span-2">
                 <label className="block text-gray-700 font-medium mb-2" htmlFor="title">
-                  Title <span className="text-red-500">*</span>
+                  标题 <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -245,11 +150,12 @@ export default function EditLinkPage() {
                   name="title"
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   value={formData.title}
-                  onChange={handleChange}
+                  onChange={handleInputChange}
+                  placeholder="例如：Blender"
                   required
                 />
               </div>
-              
+
               <div className="col-span-1 md:col-span-2">
                 <label className="block text-gray-700 font-medium mb-2" htmlFor="url">
                   URL <span className="text-red-500">*</span>
@@ -260,14 +166,15 @@ export default function EditLinkPage() {
                   name="url"
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   value={formData.url}
-                  onChange={handleChange}
+                  onChange={handleInputChange}
+                  placeholder="https://example.com"
                   required
                 />
               </div>
-              
+
               <div className="col-span-1 md:col-span-2">
                 <label className="block text-gray-700 font-medium mb-2" htmlFor="description">
-                  Description
+                  描述
                 </label>
                 <textarea
                   id="description"
@@ -275,34 +182,35 @@ export default function EditLinkPage() {
                   rows={4}
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   value={formData.description}
-                  onChange={handleChange}
-                ></textarea>
+                  onChange={handleInputChange}
+                  placeholder="简要描述这个工具的功能和特点"
+                />
               </div>
-              
+
               <div>
                 <label className="block text-gray-700 font-medium mb-2" htmlFor="category">
-                  Category <span className="text-red-500">*</span>
+                  分类 <span className="text-red-500">*</span>
                 </label>
                 <select
                   id="category"
                   name="category"
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   value={formData.category}
-                  onChange={handleChange}
+                  onChange={handleInputChange}
                   required
                 >
-                  <option value="">Select Category</option>
-                  {categories.map((category) => (
-                    <option key={category.value} value={category.value}>
-                      {category.label}
+                  <option value="">选择分类</option>
+                  {availableCategories.map((category) => (
+                    <option key={category.id} value={category.id}>
+                      {category.title}
                     </option>
                   ))}
                 </select>
               </div>
-              
+
               <div>
                 <label className="block text-gray-700 font-medium mb-2" htmlFor="subcategory">
-                  Subcategory
+                  子分类
                 </label>
                 <input
                   type="text"
@@ -310,13 +218,14 @@ export default function EditLinkPage() {
                   name="subcategory"
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   value={formData.subcategory}
-                  onChange={handleChange}
+                  onChange={handleInputChange}
+                  placeholder="可选的子分类"
                 />
               </div>
-              
+
               <div>
                 <label className="block text-gray-700 font-medium mb-2" htmlFor="order">
-                  Display Order
+                  排序权重
                 </label>
                 <input
                   type="number"
@@ -324,10 +233,12 @@ export default function EditLinkPage() {
                   name="order"
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   value={formData.order}
-                  onChange={handleChange}
+                  onChange={handleInputChange}
+                  placeholder="0"
+                  min="0"
                 />
               </div>
-              
+
               <div className="flex items-center">
                 <input
                   type="checkbox"
@@ -335,37 +246,38 @@ export default function EditLinkPage() {
                   name="featured"
                   className="h-5 w-5 text-blue-600"
                   checked={formData.featured}
-                  onChange={handleChange}
+                  onChange={handleInputChange}
                 />
                 <label className="ml-2 text-gray-700" htmlFor="featured">
-                  Featured Link
+                  设为特色链接
                 </label>
               </div>
             </div>
-            
+
+            {/* 操作按钮 */}
             <div className="flex justify-between">
               <button
                 type="button"
                 onClick={handleDelete}
                 className="px-6 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 disabled:opacity-50"
-                disabled={loading}
+                disabled={isLoading}
               >
-                Delete Link
+                删除链接
               </button>
               
               <div className="flex space-x-4">
-                <Link
+                <Link 
                   href="/admin/links"
                   className="px-6 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition"
                 >
-                  Cancel
+                  取消
                 </Link>
                 <button
                   type="submit"
                   className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
-                  disabled={loading}
+                  disabled={isLoading}
                 >
-                  {loading ? 'Updating...' : 'Update Link'}
+                  {isLoading ? '更新中...' : '更新链接'}
                 </button>
               </div>
             </div>
@@ -373,5 +285,5 @@ export default function EditLinkPage() {
         </div>
       </div>
     </div>
-  );
+  )
 } 
