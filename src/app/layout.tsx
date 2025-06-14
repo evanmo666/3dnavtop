@@ -67,6 +67,13 @@ export default function RootLayout({
             gtag('config', 'G-49YKL1MW8H');
           `}
         </Script>
+        {/* Google AdSense */}
+        <Script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6940272936543623"
+          crossOrigin="anonymous"
+          strategy="afterInteractive"
+        />
       </head>
       <body className={`${inter.className} min-h-screen flex flex-col bg-gray-50`}>
         <Providers>
