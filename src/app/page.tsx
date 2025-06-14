@@ -52,21 +52,21 @@ export default function Home() {
   const featuredLinks = allLinks.filter(link => link.featured);
   
   return (
-    <div className="min-h-screen bg-gray-50 relative">
-      {/* 背景图片层 */}
-      <div 
-        className="absolute inset-0 overflow-hidden"
-        style={{
-          backgroundImage: 'url(/blackgroud.jpg)',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat',
-          opacity: 0.1,
-          zIndex: -1
-        }}
-      ></div>
+    <div className="min-h-screen bg-gray-50">
       {/* 英雄区域 */}
-      <section className="relative bg-gradient-to-r from-blue-600 to-indigo-700 text-white py-16">
+      <section className="relative text-white py-16 overflow-hidden">
+        {/* 背景图片层 */}
+        <div 
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          style={{
+            backgroundImage: 'url(/blackgroud.jpg)',
+          }}
+        ></div>
+        
+        {/* 渐变叠加层，提供透明度和确保文字可读性 */}
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-600/80 to-indigo-700/80"></div>
+        
+        {/* 装饰性光效 */}
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute w-96 h-96 -top-48 -left-48 bg-white/10 rounded-full blur-3xl"></div>
           <div className="absolute w-96 h-96 -bottom-48 -right-48 bg-white/10 rounded-full blur-3xl"></div>
