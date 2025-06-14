@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { allLinks, categories as dataCategories } from '../../data/links';
 
 interface LinkItem {
   _id: string;
@@ -26,117 +27,16 @@ export default function LinksPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
 
-  // 模拟类别数据
+  // 从数据源生成类别选项
   const categories = [
     { value: '', label: 'All Categories' },
-    { value: 'Software', label: 'Software' },
-    { value: 'Tutorials', label: 'Tutorials' },
-    { value: 'Plugins', label: 'Plugins' },
-    { value: 'Assets', label: 'Assets' },
-    { value: 'Communities', label: 'Communities' },
-    { value: 'Inspiration', label: 'Inspiration' }
+    ...dataCategories.slice(1).map(cat => ({
+      value: cat.id,
+      label: cat.title
+    }))
   ];
 
-  // 模拟链接数据
-  const mockLinks: LinkItem[] = [
-    {
-      _id: '1',
-      title: 'Maxon Cinema 4D Official',
-      url: 'https://www.maxon.net/zh/cinema-4d',
-      category: 'Software',
-      featured: true,
-      createdAt: '2023-05-10T00:00:00.000Z'
-    },
-    {
-      _id: '2',
-      title: 'Blender Official',
-      url: 'https://www.blender.org/',
-      category: 'Software',
-      featured: true,
-      createdAt: '2023-05-11T00:00:00.000Z'
-    },
-    {
-      _id: '3',
-      title: 'Greyscalegorilla',
-      url: 'https://greyscalegorilla.com/',
-      category: 'Resources',
-      subcategory: 'Textures',
-      featured: true,
-      createdAt: '2023-05-12T00:00:00.000Z'
-    },
-    {
-      _id: '4',
-      title: 'Blender Guru',
-      url: 'https://www.youtube.com/@blenderguru',
-      category: 'Tutorials',
-      featured: false,
-      createdAt: '2023-05-13T00:00:00.000Z'
-    },
-    {
-      _id: '5',
-      title: 'Poly Haven',
-      url: 'https://polyhaven.com/',
-      category: 'Assets',
-      featured: false,
-      createdAt: '2023-05-14T00:00:00.000Z'
-    },
-    {
-      _id: '6',
-      title: 'Blender Artists Community',
-      url: 'https://blenderartists.org/',
-      category: 'Communities',
-      featured: false,
-      createdAt: '2023-05-15T00:00:00.000Z'
-    },
-    {
-      _id: '7',
-      title: 'ArtStation',
-      url: 'https://www.artstation.com/',
-      category: 'Inspiration',
-      featured: false,
-      createdAt: '2023-05-16T00:00:00.000Z'
-    },
-    {
-      _id: '8',
-      title: 'TurboSquid',
-      url: 'https://www.turbosquid.com/',
-      category: 'Assets',
-      featured: false,
-      createdAt: '2023-05-17T00:00:00.000Z'
-    },
-    {
-      _id: '9',
-      title: 'CGTrader',
-      url: 'https://www.cgtrader.com/',
-      category: 'Assets',
-      featured: false,
-      createdAt: '2023-05-18T00:00:00.000Z'
-    },
-    {
-      _id: '10',
-      title: 'Octane Render',
-      url: 'https://home.otoy.com/render/octane-render/',
-      category: 'Plugins',
-      featured: false,
-      createdAt: '2023-05-19T00:00:00.000Z'
-    },
-    {
-      _id: '11',
-      title: 'X-Particles',
-      url: 'https://insydium.ltd/',
-      category: 'Plugins',
-      featured: false,
-      createdAt: '2023-05-20T00:00:00.000Z'
-    },
-    {
-      _id: '12',
-      title: 'Behance',
-      url: 'https://www.behance.net/',
-      category: 'Inspiration',
-      featured: false,
-      createdAt: '2023-05-21T00:00:00.000Z'
-    }
-  ];
+
 
   useEffect(() => {
     // 检查认证状态
@@ -159,13 +59,20 @@ export default function LinksPage() {
   const fetchLinks = async () => {
     try {
       setLoading(true);
-      // 在实际项目中，这里会调用API获取链接数据
-      // const response = await fetch('/api/links');
-      // const data = await response.json();
-      // setLinks(data);
       
-      // 使用模拟数据
-      setLinks(mockLinks);
+      // 使用真实数据源
+      const linksData = allLinks.map(link => ({
+        _id: link._id,
+        title: link.title,
+        url: link.url,
+        category: link.category,
+        subcategory: link.subcategory,
+        featured: link.featured || false,
+        createdAt: link.createdAt.toISOString()
+      }));
+      
+      setLinks(linksData);
+      console.log('链接数据加载完成:', linksData.length, '个链接');
       setLoading(false);
     } catch (error: any) {
       setError(error.message || 'Failed to fetch links');

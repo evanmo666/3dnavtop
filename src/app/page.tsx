@@ -15,6 +15,19 @@ export default function Home() {
   // 创建分类的引用，用于滚动定位
   const categoryRefs = useRef<{[key: string]: HTMLDivElement | null}>({});
   
+  // 添加调试信息
+  useEffect(() => {
+    console.log('=== 前台页面数据统计调试 ===');
+    console.log('allLinks总数:', allLinks.length);
+    console.log('allLinks数组:', allLinks.slice(0, 3)); // 显示前3个链接
+    console.log('特色链接数:', allLinks.filter(link => link.featured).length);
+    console.log('特色链接列表:', allLinks.filter(link => link.featured).map(link => link.title));
+    console.log('categories总数:', categories.length);
+    console.log('实际分类数(减去all):', categories.length - 1);
+    console.log('categories列表:', categories.map(cat => cat.title));
+    console.log('================================');
+  }, []);
+  
   // 设置ref的函数
   const setCategoryRef = (id: string) => (el: HTMLDivElement | null) => {
     categoryRefs.current[id] = el;

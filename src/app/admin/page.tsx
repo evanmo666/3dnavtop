@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { allLinks, categories } from '../data/links';
 
 export default function AdminDashboard() {
   const { data: session, status } = useSession();
@@ -36,13 +37,35 @@ export default function AdminDashboard() {
   const fetchStats = async () => {
     try {
       setLoading(true);
-      // 这里会调用后端API获取统计数据
-      // 这里使用模拟数据
+      
+      // 从实际数据源计算统计信息
+      const totalLinks = allLinks.length;
+      const featuredLinks = allLinks.filter(link => link.featured).length;
+      const totalCategories = categories.length - 1; // 减去'all'分类
+      
+      // 详细调试信息
+      console.log('=== 后台管理数据统计调试 ===');
+      console.log('allLinks总数:', totalLinks);
+      console.log('allLinks数组:', allLinks.slice(0, 3)); // 显示前3个链接
+      console.log('特色链接数:', featuredLinks);
+      console.log('特色链接列表:', allLinks.filter(link => link.featured).map(link => link.title));
+      console.log('categories总数:', categories.length);
+      console.log('实际分类数(减去all):', totalCategories);
+      console.log('categories列表:', categories.map(cat => cat.title));
+      console.log('================================');
+      
       setStats({
-        totalLinks: 125,
-        categories: 6,
-        featuredLinks: 3
+        totalLinks,
+        categories: totalCategories,
+        featuredLinks
       });
+      
+      console.log('统计数据更新:', {
+        totalLinks,
+        categories: totalCategories,
+        featuredLinks
+      });
+      
       setLoading(false);
     } catch (error) {
       console.error('Failed to fetch stats', error);
@@ -157,7 +180,7 @@ export default function AdminDashboard() {
                   URL
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Added
+                  Status
                 </th>
                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Actions
@@ -165,51 +188,39 @@ export default function AdminDashboard() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {/* 示例数据行 */}
-              <tr>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm font-medium text-gray-900">Blender Artists Community</div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-                    Communities
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  <a href="https://blenderartists.org/" className="text-blue-600 hover:underline" target="_blank" rel="noopener noreferrer">
-                    blenderartists.org
-                  </a>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  2 days ago
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                  <Link href="/admin/links" className="text-blue-600 hover:text-blue-900 mr-3">Edit</Link>
-                  <span className="text-gray-400 cursor-not-allowed">Delete</span>
-                </td>
-              </tr>
-              <tr>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm font-medium text-gray-900">Poly Haven</div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                    Assets
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  <a href="https://polyhaven.com/" className="text-blue-600 hover:underline" target="_blank" rel="noopener noreferrer">
-                    polyhaven.com
-                  </a>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  3 days ago
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                  <Link href="/admin/links" className="text-blue-600 hover:text-blue-900 mr-3">Edit</Link>
-                  <span className="text-gray-400 cursor-not-allowed">Delete</span>
-                </td>
-              </tr>
+              {/* 显示最新的5个链接 */}
+              {allLinks.slice(-5).reverse().map((link) => (
+                <tr key={link._id}>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm font-medium text-gray-900">{link.title}</div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800 capitalize">
+                      {link.category}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <a href={link.url} className="text-blue-600 hover:underline truncate block max-w-xs" target="_blank" rel="noopener noreferrer">
+                      {new URL(link.url).hostname}
+                    </a>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    {link.featured ? (
+                      <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-amber-100 text-amber-800">
+                        Featured
+                      </span>
+                    ) : (
+                      <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
+                        Normal
+                      </span>
+                    )}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <Link href="/admin/links" className="text-blue-600 hover:text-blue-900 mr-3">Edit</Link>
+                    <span className="text-gray-400 cursor-not-allowed">Delete</span>
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
           <div className="px-6 py-4 bg-gray-50 border-t border-gray-200">
@@ -217,7 +228,7 @@ export default function AdminDashboard() {
               href="/admin/links" 
               className="text-blue-600 hover:text-blue-800 font-medium"
             >
-              View all links &rarr;
+              View all {allLinks.length} links &rarr;
             </Link>
           </div>
         </div>
