@@ -57,6 +57,7 @@ npm run dev
   - 在顶部导航栏的3DNAV.TOP文字左侧添加了LOGO.png
   - 优化了网站品牌视觉识别
   - 使用Next.js Image组件优化图片加载性能
+  - 添加了全站背景图片blackgroud.jpg，设置透明度确保文字可读性
 
 ## 许可证
 MIT License
