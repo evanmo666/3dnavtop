@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { allLinks } from '@/app/data/links';
-import { addLinkToFile } from './file-operations';
+import { addLinkToFile, getEnvironmentInfo } from './file-operations';
+
+// 内存中的链接数据（用于无服务器环境）
+let memoryLinks = [...allLinks];
 
 // GET - 获取所有链接
 export async function GET() {
@@ -31,6 +34,10 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+
+    // 检查环境信息
+    const envInfo = getEnvironmentInfo();
+    console.log('环境信息:', envInfo);
     
     // 创建新链接对象
     const newLink = {
@@ -45,14 +52,58 @@ export async function POST(request: NextRequest) {
       updatedAt: new Date()
     };
 
-    // 添加到文件
-    addLinkToFile(newLink);
-
-    return NextResponse.json({
-      success: true,
-      data: { ...newLink, _id: 'generated' }, // ID会在文件操作中生成
-      message: '链接添加成功，数据已永久保存'
-    });
+    // 根据环境选择存储方式
+    if (envInfo.isServerless || !envInfo.hasWritePermission) {
+      // 无服务器环境或无写入权限 - 使用内存模式
+      const maxId = memoryLinks.reduce((max, link) => {
+        const id = parseInt(link._id);
+        return isNaN(id) ? max : Math.max(max, id);
+      }, 0);
+      const newId = (maxId + 1).toString();
+      
+      const linkWithId = { ...newLink, _id: newId };
+      memoryLinks.push(linkWithId);
+      
+      console.log('新链接添加成功 (内存模式):', newLink.title);
+      
+      return NextResponse.json({
+        success: true,
+        data: linkWithId,
+        message: '链接添加成功 (演示模式 - 当前环境不支持文件写入)',
+        mode: 'memory'
+      });
+    } else {
+      // 本地环境 - 使用文件模式
+      try {
+        addLinkToFile(newLink);
+        
+        return NextResponse.json({
+          success: true,
+          data: { ...newLink, _id: 'generated' }, // ID会在文件操作中生成
+          message: '链接添加成功，数据已永久保存到文件',
+          mode: 'file'
+        });
+      } catch (fileError) {
+        // 文件操作失败，回退到内存模式
+        console.error('文件操作失败，回退到内存模式:', fileError);
+        
+        const maxId = memoryLinks.reduce((max, link) => {
+          const id = parseInt(link._id);
+          return isNaN(id) ? max : Math.max(max, id);
+        }, 0);
+        const newId = (maxId + 1).toString();
+        
+        const linkWithId = { ...newLink, _id: newId };
+        memoryLinks.push(linkWithId);
+        
+        return NextResponse.json({
+          success: true,
+          data: linkWithId,
+          message: '链接添加成功 (演示模式 - 文件操作失败，已回退到内存模式)',
+          mode: 'memory_fallback'
+        });
+      }
+    }
 
   } catch (error) {
     console.error('添加链接失败:', error);

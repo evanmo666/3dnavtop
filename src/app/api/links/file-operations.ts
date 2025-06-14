@@ -7,6 +7,42 @@ const DATA_FILE_PATH = path.join(process.cwd(), 'src/app/data/links.ts');
 // 备份文件路径
 const BACKUP_FILE_PATH = path.join(process.cwd(), 'src/app/data/links.backup.ts');
 
+// 检测是否为无服务器环境
+function isServerlessEnvironment(): boolean {
+  return (
+    process.env.VERCEL === '1' ||
+    process.env.NETLIFY === 'true' ||
+    process.env.AWS_LAMBDA_FUNCTION_NAME !== undefined ||
+    process.cwd().includes('/var/task') ||
+    process.cwd().includes('/tmp') ||
+    !fs.existsSync(path.dirname(DATA_FILE_PATH))
+  );
+}
+
+// 检测是否有文件写入权限
+function hasWritePermission(): boolean {
+  try {
+    if (isServerlessEnvironment()) {
+      return false;
+    }
+    
+    // 检查文件是否存在
+    if (!fs.existsSync(DATA_FILE_PATH)) {
+      console.log('数据文件不存在:', DATA_FILE_PATH);
+      return false;
+    }
+    
+    // 尝试写入测试
+    const testFile = path.join(path.dirname(DATA_FILE_PATH), '.write-test');
+    fs.writeFileSync(testFile, 'test');
+    fs.unlinkSync(testFile);
+    return true;
+  } catch (error) {
+    console.log('无文件写入权限:', error);
+    return false;
+  }
+}
+
 // 创建备份
 function createBackup(): void {
   try {
@@ -33,6 +69,8 @@ function checkFileExists(): boolean {
 export function readLinksFile(): string {
   try {
     console.log('尝试读取文件:', DATA_FILE_PATH);
+    console.log('当前工作目录:', process.cwd());
+    console.log('是否为无服务器环境:', isServerlessEnvironment());
     
     if (!checkFileExists()) {
       throw new Error(`数据文件不存在: ${DATA_FILE_PATH}`);
@@ -53,6 +91,15 @@ export function readLinksFile(): string {
 export function writeLinksFile(content: string): void {
   try {
     console.log('尝试写入文件:', DATA_FILE_PATH);
+    
+    // 检查环境和权限
+    if (isServerlessEnvironment()) {
+      throw new Error('当前环境不支持文件写入操作（无服务器环境）');
+    }
+    
+    if (!hasWritePermission()) {
+      throw new Error('没有文件写入权限');
+    }
     
     // 创建备份
     createBackup();
@@ -239,4 +286,15 @@ export function restoreFromBackup(): boolean {
     console.error('恢复备份失败:', error);
     return false;
   }
+}
+
+// 检查当前环境支持的操作模式
+export function getEnvironmentInfo() {
+  return {
+    isServerless: isServerlessEnvironment(),
+    hasWritePermission: hasWritePermission(),
+    currentWorkingDirectory: process.cwd(),
+    dataFilePath: DATA_FILE_PATH,
+    fileExists: checkFileExists()
+  };
 } 

@@ -1,14 +1,15 @@
 "use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { categories } from '@/app/data/links';
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { categories } from "@/app/data/links";
 
 export default function NewLinkPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [currentMode, setCurrentMode] = useState<'file' | 'memory' | 'unknown'>('unknown');
   const [formData, setFormData] = useState({
     title: '',
     url: '',
@@ -18,6 +19,23 @@ export default function NewLinkPage() {
     featured: false,
     order: 0
   });
+
+  // 检查当前环境模式
+  useEffect(() => {
+    const checkEnvironment = async () => {
+      try {
+        const response = await fetch('/api/environment');
+        const result = await response.json();
+        if (result.success) {
+          setCurrentMode(result.data.recommendedMode);
+        }
+      } catch (error) {
+        console.error('检查环境失败:', error);
+        setCurrentMode('memory'); // 默认为内存模式
+      }
+    };
+    checkEnvironment();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,6 +54,10 @@ export default function NewLinkPage() {
       const result = await response.json();
 
       if (result.success) {
+        // 更新当前模式
+        if (result.mode) {
+          setCurrentMode(result.mode === 'file' ? 'file' : 'memory');
+        }
         alert(result.message || '链接添加成功！');
         router.push('/admin/links');
       } else {
@@ -60,6 +82,32 @@ export default function NewLinkPage() {
   // 过滤掉'all'分类，只显示实际分类
   const availableCategories = categories.filter(cat => cat.id !== 'all');
 
+  // 根据模式显示不同的提示
+  const getModeDisplay = () => {
+    switch (currentMode) {
+      case 'file':
+        return {
+          className: 'bg-green-100 text-green-800',
+          icon: '📁',
+          text: '文件模式 - 数据将永久保存到文件'
+        };
+      case 'memory':
+        return {
+          className: 'bg-yellow-100 text-yellow-800',
+          icon: '🎭',
+          text: '演示模式 - 当前环境不支持文件写入'
+        };
+      default:
+        return {
+          className: 'bg-gray-100 text-gray-800',
+          icon: '🔍',
+          text: '检测中...'
+        };
+    }
+  };
+
+  const modeDisplay = getModeDisplay();
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="max-w-2xl mx-auto">
@@ -68,8 +116,8 @@ export default function NewLinkPage() {
           <div>
             <h1 className="text-3xl font-bold mb-2">添加新链接</h1>
             <p className="text-gray-600">添加一个新的3D设计工具链接到导航</p>
-            <div className="mt-2 px-3 py-1 bg-green-100 text-green-800 text-sm rounded-md inline-block">
-              📁 文件模式 - 数据将永久保存到文件
+            <div className={`mt-2 px-3 py-1 text-sm rounded-md inline-block ${modeDisplay.className}`}>
+              {modeDisplay.icon} {modeDisplay.text}
             </div>
           </div>
           <Link 
