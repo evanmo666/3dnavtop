@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { allLinks } from '@/app/data/links';
-
-// 内存中的链接数据（用于演示）
-let memoryLinks = [...allLinks];
+import { updateLinkInFile, deleteLinkFromFile } from '../file-operations';
 
 // GET - 获取单个链接
 export async function GET(
@@ -10,7 +8,7 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const link = memoryLinks.find(l => l._id === params.id);
+    const link = allLinks.find(l => l._id === params.id);
     
     if (!link) {
       return NextResponse.json(
@@ -41,8 +39,8 @@ export async function PUT(
     const body = await request.json();
     
     // 检查链接是否存在
-    const linkIndex = memoryLinks.findIndex(l => l._id === params.id);
-    if (linkIndex === -1) {
+    const existingLink = allLinks.find(l => l._id === params.id);
+    if (!existingLink) {
       return NextResponse.json(
         { success: false, error: '链接不存在' },
         { status: 404 }
@@ -67,19 +65,17 @@ export async function PUT(
       subcategory: body.subcategory || '',
       featured: body.featured || false,
       order: body.order || 0,
-      createdAt: memoryLinks[linkIndex].createdAt,
+      createdAt: existingLink.createdAt,
       updatedAt: new Date()
     };
 
-    // 更新内存中的链接
-    memoryLinks[linkIndex] = updatedLink;
-
-    console.log('链接更新成功 (内存模式):', updatedLink.title);
+    // 更新文件中的链接
+    updateLinkInFile(params.id, updatedLink);
 
     return NextResponse.json({
       success: true,
       data: updatedLink,
-      message: '链接更新成功 (演示模式 - 重启后数据会丢失)'
+      message: '链接更新成功，数据已永久保存'
     });
 
   } catch (error) {
@@ -98,22 +94,20 @@ export async function DELETE(
 ) {
   try {
     // 检查链接是否存在
-    const linkIndex = memoryLinks.findIndex(l => l._id === params.id);
-    if (linkIndex === -1) {
+    const existingLink = allLinks.find(l => l._id === params.id);
+    if (!existingLink) {
       return NextResponse.json(
         { success: false, error: '链接不存在' },
         { status: 404 }
       );
     }
 
-    // 从内存中删除链接
-    const deletedLink = memoryLinks.splice(linkIndex, 1)[0];
-
-    console.log('链接删除成功 (内存模式):', deletedLink.title);
+    // 从文件中删除链接
+    deleteLinkFromFile(params.id);
 
     return NextResponse.json({
       success: true,
-      message: '链接删除成功 (演示模式 - 重启后数据会恢复)'
+      message: '链接删除成功，数据已永久保存'
     });
 
   } catch (error) {

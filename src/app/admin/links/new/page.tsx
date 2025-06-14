@@ -68,8 +68,8 @@ export default function NewLinkPage() {
           <div>
             <h1 className="text-3xl font-bold mb-2">添加新链接</h1>
             <p className="text-gray-600">添加一个新的3D设计工具链接到导航</p>
-            <div className="mt-2 px-3 py-1 bg-yellow-100 text-yellow-800 text-sm rounded-md inline-block">
-              🎭 演示模式 - 重启后数据会丢失
+            <div className="mt-2 px-3 py-1 bg-green-100 text-green-800 text-sm rounded-md inline-block">
+              📁 文件模式 - 数据将永久保存到文件
             </div>
           </div>
           <Link 

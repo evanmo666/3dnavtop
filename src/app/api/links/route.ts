@@ -1,16 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { allLinks } from '@/app/data/links';
-
-// 内存中的链接数据（用于演示）
-let memoryLinks = [...allLinks];
+import { addLinkToFile } from './file-operations';
 
 // GET - 获取所有链接
 export async function GET() {
   try {
     return NextResponse.json({
       success: true,
-      data: memoryLinks,
-      total: memoryLinks.length
+      data: allLinks,
+      total: allLinks.length
     });
   } catch (error) {
     console.error('获取链接失败:', error);
@@ -33,17 +31,9 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-
-    // 生成新ID
-    const maxId = memoryLinks.reduce((max, link) => {
-      const id = parseInt(link._id);
-      return isNaN(id) ? max : Math.max(max, id);
-    }, 0);
-    const newId = (maxId + 1).toString();
     
     // 创建新链接对象
     const newLink = {
-      _id: newId,
       title: body.title,
       url: body.url,
       description: body.description || '',
@@ -55,15 +45,13 @@ export async function POST(request: NextRequest) {
       updatedAt: new Date()
     };
 
-    // 添加到内存数据
-    memoryLinks.push(newLink);
-
-    console.log('新链接添加成功 (内存模式):', newLink.title);
+    // 添加到文件
+    addLinkToFile(newLink);
 
     return NextResponse.json({
       success: true,
-      data: newLink,
-      message: '链接添加成功 (演示模式 - 重启后数据会丢失)'
+      data: { ...newLink, _id: 'generated' }, // ID会在文件操作中生成
+      message: '链接添加成功，数据已永久保存'
     });
 
   } catch (error) {
