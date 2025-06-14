@@ -1,17 +1,21 @@
 "use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useRouter, useParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
-import { categories as dataCategories } from '../../../data/links';
+import { allLinks, categories as dataCategories } from '../../../data/links';
 
-export default function AddLinkPage() {
+export default function EditLinkPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const params = useParams();
+  const linkId = params.id as string;
+  
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [linkFound, setLinkFound] = useState(false);
   
   const [formData, setFormData] = useState({
     title: '',
@@ -29,7 +33,28 @@ export default function AddLinkPage() {
     label: cat.title
   }));
 
-  console.log('可用分类:', categories); // 调试信息
+  // 加载链接数据
+  useEffect(() => {
+    if (linkId) {
+      const link = allLinks.find(l => l._id === linkId);
+      if (link) {
+        setFormData({
+          title: link.title,
+          url: link.url,
+          description: link.description || '',
+          category: link.category,
+          subcategory: link.subcategory || '',
+          featured: link.featured || false,
+          order: link.order || 0
+        });
+        setLinkFound(true);
+        console.log('加载链接数据:', link);
+      } else {
+        setError('Link not found');
+        setLinkFound(false);
+      }
+    }
+  }, [linkId]);
 
   // 权限检查
   if (status === 'loading') {
@@ -65,6 +90,17 @@ export default function AddLinkPage() {
     );
   }
 
+  if (!linkFound && !error) {
+    return (
+      <div className="min-h-[80vh] flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading link data...</p>
+        </div>
+      </div>
+    );
+  }
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target as HTMLInputElement;
     
@@ -86,39 +122,23 @@ export default function AddLinkPage() {
       setLoading(true);
       setError('');
       
-      // 提交到API
-      const response = await fetch('/api/links', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
+      // 在实际项目中，这里会调用API更新链接
+      // const response = await fetch(`/api/links/${linkId}`, {
+      //   method: 'PUT',
+      //   headers: {
+      //     'Content-Type': 'application/json',
+      //   },
+      //   body: JSON.stringify(formData),
+      // });
       
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
-        throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
-      }
-      
-      const data = await response.json();
-      
-      setSuccess('Link added successfully!');
-      
-      // 重置表单
-      setFormData({
-        title: '',
-        url: '',
-        description: '',
-        category: '',
-        subcategory: '',
-        featured: false,
-        order: 0
-      });
+      // 模拟成功更新
+      console.log('更新链接数据:', formData);
+      setSuccess('Link updated successfully! (Note: This is a demo - changes are not persisted)');
       
       // 等待几秒后返回到链接列表
       setTimeout(() => {
         router.push('/admin/links');
-      }, 2000);
+      }, 3000);
     } catch (error: any) {
       setError(error.message);
     } finally {
@@ -126,12 +146,35 @@ export default function AddLinkPage() {
     }
   };
 
+  if (error && !linkFound) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="mb-8 flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold mb-2">Edit Link</h1>
+            <p className="text-gray-600">Link not found</p>
+          </div>
+          <Link 
+            href="/admin/links" 
+            className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md transition"
+          >
+            Back to Links
+          </Link>
+        </div>
+        
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+          {error}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8 flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold mb-2">Add New Link</h1>
-          <p className="text-gray-600">Add a new resource to the 3D navigation</p>
+          <h1 className="text-3xl font-bold mb-2">Edit Link</h1>
+          <p className="text-gray-600">Update resource information</p>
         </div>
         <Link 
           href="/admin/links" 
@@ -264,14 +307,21 @@ export default function AddLinkPage() {
             </div>
           </div>
           
-          <div className="mt-8">
+          <div className="mt-8 flex space-x-4">
             <button
               type="submit"
               className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
               disabled={loading}
             >
-              {loading ? 'Adding...' : 'Add Link'}
+              {loading ? 'Updating...' : 'Update Link'}
             </button>
+            
+            <Link
+              href="/admin/links"
+              className="px-6 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition"
+            >
+              Cancel
+            </Link>
           </div>
         </form>
       </div>
