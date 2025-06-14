@@ -717,6 +717,18 @@ export const allLinks: ILink[] = [
     createdAt: new Date(),
     updatedAt: new Date()
   },
+  {
+    _id: '61',
+    title: 'Artlist',
+    url: 'https://artlist.io',
+    description: 'Powerful Digital Assets & Tools for Video Creators | Artlist',
+    category: 'audio',
+    subcategory: 'Music',
+    featured: false,
+    order: 4,
+    createdAt: new Date(),
+    updatedAt: new Date()
+  },
   // 示例：新增链接
   {
     _id: '60',
