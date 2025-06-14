@@ -1,61 +1,68 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { connectDB } from '@/app/lib/db';
-import Link from '@/app/models/Link';
-import { getServerSession } from 'next-auth/next';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { allLinks } from '@/app/data/links';
+import { addLinkToFile, generateNewLinkId } from './file-operations';
 
-// 获取所有链接
-export async function GET(req: NextRequest) {
+// GET - 获取所有链接
+export async function GET() {
   try {
-    await connectDB();
-    
-    const { searchParams } = new URL(req.url);
-    const category = searchParams.get('category');
-    const featured = searchParams.get('featured');
-    
-    const query: any = {};
-    
-    if (category) {
-      query.category = category;
-    }
-    
-    if (featured === 'true') {
-      query.featured = true;
-    }
-    
-    const links = await Link.find(query).sort({ order: 1, createdAt: -1 });
-    
-    return NextResponse.json(links);
+    return NextResponse.json({
+      success: true,
+      data: allLinks,
+      total: allLinks.length
+    });
   } catch (error) {
-    console.error('获取链接失败', error);
-    return NextResponse.json({ error: '获取链接失败' }, { status: 500 });
+    console.error('获取链接失败:', error);
+    return NextResponse.json(
+      { success: false, error: '获取链接失败' },
+      { status: 500 }
+    );
   }
 }
 
-// 创建新链接
-export async function POST(req: NextRequest) {
+// POST - 添加新链接
+export async function POST(request: NextRequest) {
   try {
-    await connectDB();
+    const body = await request.json();
     
-    // 检查身份验证
-    const session = await getServerSession(authOptions);
-    
-    if (!session || !session.user || session.user.role !== 'admin') {
-      return NextResponse.json({ error: '未授权' }, { status: 401 });
+    // 验证必填字段
+    if (!body.title || !body.url || !body.category) {
+      return NextResponse.json(
+        { success: false, error: '标题、URL和分类为必填项' },
+        { status: 400 }
+      );
     }
+
+    // 生成新ID
+    const newId = generateNewLinkId(allLinks);
     
-    const body = await req.json();
-    
-    const newLink = await Link.create(body);
-    
-    return NextResponse.json(newLink, { status: 201 });
-  } catch (error: any) {
-    console.error('创建链接失败', error);
-    
-    if (error.code === 11000) {
-      return NextResponse.json({ error: '链接URL已存在' }, { status: 400 });
-    }
-    
-    return NextResponse.json({ error: '创建链接失败' }, { status: 500 });
+    // 创建新链接对象
+    const newLink = {
+      _id: newId,
+      title: body.title,
+      url: body.url,
+      description: body.description || '',
+      category: body.category,
+      subcategory: body.subcategory || '',
+      featured: body.featured || false,
+      order: body.order || 0,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+
+    // 添加到文件
+    addLinkToFile(newLink);
+
+    return NextResponse.json({
+      success: true,
+      data: newLink,
+      message: '链接添加成功'
+    });
+
+  } catch (error) {
+    console.error('添加链接失败:', error);
+    return NextResponse.json(
+      { success: false, error: error instanceof Error ? error.message : '添加链接失败' },
+      { status: 500 }
+    );
   }
 } 

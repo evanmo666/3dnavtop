@@ -131,21 +131,48 @@ export default function EditLinkPage() {
         body: JSON.stringify(formData),
       });
       
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
-        throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
+      const result = await response.json();
+
+      if (result.success) {
+        setSuccess('Link updated successfully!');
+        setTimeout(() => {
+          router.push('/admin/links');
+        }, 3000);
+      } else {
+        setError(result.error || 'Update failed');
       }
-      
-      const updatedLink = await response.json();
-      console.log('链接更新成功:', updatedLink);
-      setSuccess('Link updated successfully!');
-      
-      // 等待几秒后返回到链接列表
-      setTimeout(() => {
-        router.push('/admin/links');
-      }, 3000);
     } catch (error: any) {
-      setError(error.message);
+      console.error('Update link failed:', error);
+      setError('Update link failed, please try again');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!confirm('Are you sure you want to delete this link? This operation cannot be undone.')) {
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await fetch(`/api/links/${linkId}`, {
+        method: 'DELETE',
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        setSuccess('Link deleted successfully!');
+        setTimeout(() => {
+          router.push('/admin/links');
+        }, 3000);
+      } else {
+        setError(result.error || 'Delete failed');
+      }
+    } catch (error) {
+      console.error('Delete link failed:', error);
+      setError('Delete link failed, please try again');
     } finally {
       setLoading(false);
     }
@@ -176,162 +203,174 @@ export default function EditLinkPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="mb-8 flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold mb-2">Edit Link</h1>
-          <p className="text-gray-600">Update resource information</p>
-          <div className="mt-2 px-3 py-1 bg-green-100 text-green-800 text-sm rounded-md inline-block">
-            💾 Database Mode - Changes will be saved permanently
+      <div className="max-w-2xl mx-auto">
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h1 className="text-3xl font-bold mb-2">Edit Link</h1>
+            <p className="text-gray-600">Update resource information</p>
+            <div className="mt-2 px-3 py-1 bg-green-100 text-green-800 text-sm rounded-md inline-block">
+              📁 Database Mode - Changes will be saved permanently
+            </div>
           </div>
+          <Link 
+            href="/admin/links" 
+            className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md transition"
+          >
+            Back to Links
+          </Link>
         </div>
-        <Link 
-          href="/admin/links" 
-          className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md transition"
-        >
-          Back to Links
-        </Link>
-      </div>
-      
-      {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
-          {error}
-        </div>
-      )}
-      
-      {success && (
-        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-6">
-          {success}
-        </div>
-      )}
-      
-      <div className="bg-white rounded-lg shadow p-6">
-        <form onSubmit={handleSubmit}>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="col-span-1 md:col-span-2">
-              <label className="block text-gray-700 font-medium mb-2" htmlFor="title">
-                Title <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                id="title"
-                name="title"
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                value={formData.title}
-                onChange={handleChange}
-                required
-              />
+        
+        {error && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
+            {error}
+          </div>
+        )}
+        
+        {success && (
+          <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-6">
+            {success}
+          </div>
+        )}
+        
+        <div className="bg-white rounded-lg shadow p-6">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="col-span-1 md:col-span-2">
+                <label className="block text-gray-700 font-medium mb-2" htmlFor="title">
+                  Title <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  id="title"
+                  name="title"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={formData.title}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+              
+              <div className="col-span-1 md:col-span-2">
+                <label className="block text-gray-700 font-medium mb-2" htmlFor="url">
+                  URL <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="url"
+                  id="url"
+                  name="url"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={formData.url}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+              
+              <div className="col-span-1 md:col-span-2">
+                <label className="block text-gray-700 font-medium mb-2" htmlFor="description">
+                  Description
+                </label>
+                <textarea
+                  id="description"
+                  name="description"
+                  rows={4}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={formData.description}
+                  onChange={handleChange}
+                ></textarea>
+              </div>
+              
+              <div>
+                <label className="block text-gray-700 font-medium mb-2" htmlFor="category">
+                  Category <span className="text-red-500">*</span>
+                </label>
+                <select
+                  id="category"
+                  name="category"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={formData.category}
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="">Select Category</option>
+                  {categories.map((category) => (
+                    <option key={category.value} value={category.value}>
+                      {category.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              
+              <div>
+                <label className="block text-gray-700 font-medium mb-2" htmlFor="subcategory">
+                  Subcategory
+                </label>
+                <input
+                  type="text"
+                  id="subcategory"
+                  name="subcategory"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={formData.subcategory}
+                  onChange={handleChange}
+                />
+              </div>
+              
+              <div>
+                <label className="block text-gray-700 font-medium mb-2" htmlFor="order">
+                  Display Order
+                </label>
+                <input
+                  type="number"
+                  id="order"
+                  name="order"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={formData.order}
+                  onChange={handleChange}
+                />
+              </div>
+              
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  id="featured"
+                  name="featured"
+                  className="h-5 w-5 text-blue-600"
+                  checked={formData.featured}
+                  onChange={handleChange}
+                />
+                <label className="ml-2 text-gray-700" htmlFor="featured">
+                  Featured Link
+                </label>
+              </div>
             </div>
             
-            <div className="col-span-1 md:col-span-2">
-              <label className="block text-gray-700 font-medium mb-2" htmlFor="url">
-                URL <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="url"
-                id="url"
-                name="url"
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                value={formData.url}
-                onChange={handleChange}
-                required
-              />
-            </div>
-            
-            <div className="col-span-1 md:col-span-2">
-              <label className="block text-gray-700 font-medium mb-2" htmlFor="description">
-                Description
-              </label>
-              <textarea
-                id="description"
-                name="description"
-                rows={4}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                value={formData.description}
-                onChange={handleChange}
-              ></textarea>
-            </div>
-            
-            <div>
-              <label className="block text-gray-700 font-medium mb-2" htmlFor="category">
-                Category <span className="text-red-500">*</span>
-              </label>
-              <select
-                id="category"
-                name="category"
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                value={formData.category}
-                onChange={handleChange}
-                required
+            <div className="flex justify-between">
+              <button
+                type="button"
+                onClick={handleDelete}
+                className="px-6 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 disabled:opacity-50"
+                disabled={loading}
               >
-                <option value="">Select Category</option>
-                {categories.map((category) => (
-                  <option key={category.value} value={category.value}>
-                    {category.label}
-                  </option>
-                ))}
-              </select>
+                Delete Link
+              </button>
+              
+              <div className="flex space-x-4">
+                <Link
+                  href="/admin/links"
+                  className="px-6 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition"
+                >
+                  Cancel
+                </Link>
+                <button
+                  type="submit"
+                  className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+                  disabled={loading}
+                >
+                  {loading ? 'Updating...' : 'Update Link'}
+                </button>
+              </div>
             </div>
-            
-            <div>
-              <label className="block text-gray-700 font-medium mb-2" htmlFor="subcategory">
-                Subcategory
-              </label>
-              <input
-                type="text"
-                id="subcategory"
-                name="subcategory"
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                value={formData.subcategory}
-                onChange={handleChange}
-              />
-            </div>
-            
-            <div>
-              <label className="block text-gray-700 font-medium mb-2" htmlFor="order">
-                Display Order
-              </label>
-              <input
-                type="number"
-                id="order"
-                name="order"
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                value={formData.order}
-                onChange={handleChange}
-              />
-            </div>
-            
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="featured"
-                name="featured"
-                className="h-5 w-5 text-blue-600"
-                checked={formData.featured}
-                onChange={handleChange}
-              />
-              <label className="ml-2 text-gray-700" htmlFor="featured">
-                Featured Link
-              </label>
-            </div>
-          </div>
-          
-          <div className="mt-8 flex space-x-4">
-            <button
-              type="submit"
-              className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
-              disabled={loading}
-            >
-              {loading ? 'Updating...' : 'Update Link'}
-            </button>
-            
-            <Link
-              href="/admin/links"
-              className="px-6 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition"
-            >
-              Cancel
-            </Link>
-          </div>
-        </form>
+          </form>
+        </div>
       </div>
     </div>
   );

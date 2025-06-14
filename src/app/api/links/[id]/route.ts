@@ -1,84 +1,120 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { connectDB } from '@/app/lib/db';
-import Link from '@/app/models/Link';
-import { getServerSession } from 'next-auth/next';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { allLinks } from '@/app/data/links';
+import { updateLinkInFile, deleteLinkFromFile } from '../file-operations';
 
-// 获取单个链接
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+// GET - 获取单个链接
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
-    await connectDB();
-    
-    const link = await Link.findById(params.id);
+    const link = allLinks.find(l => l._id === params.id);
     
     if (!link) {
-      return NextResponse.json({ error: '链接不存在' }, { status: 404 });
+      return NextResponse.json(
+        { success: false, error: '链接不存在' },
+        { status: 404 }
+      );
     }
-    
-    return NextResponse.json(link);
-  } catch (error) {
-    console.error('获取链接失败', error);
-    return NextResponse.json({ error: '获取链接失败' }, { status: 500 });
-  }
-}
 
-// 更新链接
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
-  try {
-    await connectDB();
-    
-    // 检查身份验证
-    const session = await getServerSession(authOptions);
-    
-    if (!session || !session.user || session.user.role !== 'admin') {
-      return NextResponse.json({ error: '未授权' }, { status: 401 });
-    }
-    
-    const body = await req.json();
-    
-    const updatedLink = await Link.findByIdAndUpdate(
-      params.id,
-      { ...body, updatedAt: new Date() },
-      { new: true, runValidators: true }
+    return NextResponse.json({
+      success: true,
+      data: link
+    });
+  } catch (error) {
+    console.error('获取链接失败:', error);
+    return NextResponse.json(
+      { success: false, error: '获取链接失败' },
+      { status: 500 }
     );
-    
-    if (!updatedLink) {
-      return NextResponse.json({ error: '链接不存在' }, { status: 404 });
-    }
-    
-    return NextResponse.json(updatedLink);
-  } catch (error: any) {
-    console.error('更新链接失败', error);
-    
-    if (error.code === 11000) {
-      return NextResponse.json({ error: '链接URL已存在' }, { status: 400 });
-    }
-    
-    return NextResponse.json({ error: '更新链接失败' }, { status: 500 });
   }
 }
 
-// 删除链接
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+// PUT - 更新链接
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
-    await connectDB();
+    const body = await request.json();
     
-    // 检查身份验证
-    const session = await getServerSession(authOptions);
-    
-    if (!session || !session.user || session.user.role !== 'admin') {
-      return NextResponse.json({ error: '未授权' }, { status: 401 });
+    // 检查链接是否存在
+    const existingLink = allLinks.find(l => l._id === params.id);
+    if (!existingLink) {
+      return NextResponse.json(
+        { success: false, error: '链接不存在' },
+        { status: 404 }
+      );
     }
-    
-    const deletedLink = await Link.findByIdAndDelete(params.id);
-    
-    if (!deletedLink) {
-      return NextResponse.json({ error: '链接不存在' }, { status: 404 });
+
+    // 验证必填字段
+    if (!body.title || !body.url || !body.category) {
+      return NextResponse.json(
+        { success: false, error: '标题、URL和分类为必填项' },
+        { status: 400 }
+      );
     }
-    
-    return NextResponse.json({ message: '链接删除成功' });
+
+    // 创建更新后的链接对象
+    const updatedLink = {
+      _id: params.id,
+      title: body.title,
+      url: body.url,
+      description: body.description || '',
+      category: body.category,
+      subcategory: body.subcategory || '',
+      featured: body.featured || false,
+      order: body.order || 0,
+      createdAt: existingLink.createdAt,
+      updatedAt: new Date()
+    };
+
+    // 更新文件中的链接
+    updateLinkInFile(params.id, updatedLink);
+
+    return NextResponse.json({
+      success: true,
+      data: updatedLink,
+      message: '链接更新成功'
+    });
+
   } catch (error) {
-    console.error('删除链接失败', error);
-    return NextResponse.json({ error: '删除链接失败' }, { status: 500 });
+    console.error('更新链接失败:', error);
+    return NextResponse.json(
+      { success: false, error: error instanceof Error ? error.message : '更新链接失败' },
+      { status: 500 }
+    );
+  }
+}
+
+// DELETE - 删除链接
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    // 检查链接是否存在
+    const existingLink = allLinks.find(l => l._id === params.id);
+    if (!existingLink) {
+      return NextResponse.json(
+        { success: false, error: '链接不存在' },
+        { status: 404 }
+      );
+    }
+
+    // 从文件中删除链接
+    deleteLinkFromFile(params.id);
+
+    return NextResponse.json({
+      success: true,
+      message: '链接删除成功'
+    });
+
+  } catch (error) {
+    console.error('删除链接失败:', error);
+    return NextResponse.json(
+      { success: false, error: error instanceof Error ? error.message : '删除链接失败' },
+      { status: 500 }
+    );
   }
 } 
