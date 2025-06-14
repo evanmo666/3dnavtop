@@ -122,18 +122,23 @@ export default function EditLinkPage() {
       setLoading(true);
       setError('');
       
-      // 在实际项目中，这里会调用API更新链接
-      // const response = await fetch(`/api/links/${linkId}`, {
-      //   method: 'PUT',
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //   },
-      //   body: JSON.stringify(formData),
-      // });
+      // 调用真实API更新链接
+      const response = await fetch(`/api/links/${linkId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
       
-      // 模拟成功更新
-      console.log('更新链接数据:', formData);
-      setSuccess('Link updated successfully! (Note: This is a demo - changes are not persisted)');
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
+      }
+      
+      const updatedLink = await response.json();
+      console.log('链接更新成功:', updatedLink);
+      setSuccess('Link updated successfully!');
       
       // 等待几秒后返回到链接列表
       setTimeout(() => {
@@ -175,8 +180,8 @@ export default function EditLinkPage() {
         <div>
           <h1 className="text-3xl font-bold mb-2">Edit Link</h1>
           <p className="text-gray-600">Update resource information</p>
-          <div className="mt-2 px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-md inline-block">
-            🎭 Demo Mode - Changes will not be persisted
+          <div className="mt-2 px-3 py-1 bg-green-100 text-green-800 text-sm rounded-md inline-block">
+            💾 Database Mode - Changes will be saved permanently
           </div>
         </div>
         <Link 

@@ -38,7 +38,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     
     const updatedLink = await Link.findByIdAndUpdate(
       params.id,
-      { $set: body },
+      { ...body, updatedAt: new Date() },
       { new: true, runValidators: true }
     );
     
@@ -76,7 +76,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
       return NextResponse.json({ error: '链接不存在' }, { status: 404 });
     }
     
-    return NextResponse.json({ message: '链接已删除' });
+    return NextResponse.json({ message: '链接删除成功' });
   } catch (error) {
     console.error('删除链接失败', error);
     return NextResponse.json({ error: '删除链接失败' }, { status: 500 });

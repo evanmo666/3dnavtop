@@ -86,24 +86,26 @@ export default function AddLinkPage() {
       setLoading(true);
       setError('');
       
-      // 演示模式：模拟添加链接成功
-      console.log('演示模式 - 模拟添加链接:', formData);
+      // 调用真实API添加链接
+      console.log('提交链接数据:', formData);
       
-      // 模拟API延迟
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const response = await fetch('/api/links', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
       
-      // 生成新的链接ID
-      const newLinkId = `demo_${Date.now()}`;
-      const newLink = {
-        _id: newLinkId,
-        ...formData,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      };
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
+      }
       
-      console.log('新链接已创建 (演示模式):', newLink);
+      const newLink = await response.json();
+      console.log('新链接已创建:', newLink);
       
-      setSuccess('Link added successfully! (Demo Mode - Changes are not persisted)');
+      setSuccess('Link added successfully!');
       
       // 重置表单
       setFormData({
@@ -116,10 +118,10 @@ export default function AddLinkPage() {
         order: 0
       });
       
-      // 等待几秒后返回到链接列表
+      // 等待2秒后返回到链接列表
       setTimeout(() => {
         router.push('/admin/links');
-      }, 3000);
+      }, 2000);
     } catch (error: any) {
       console.error('添加链接失败:', error);
       setError(`Failed to add link: ${error.message}`);
@@ -134,8 +136,8 @@ export default function AddLinkPage() {
         <div>
           <h1 className="text-3xl font-bold mb-2">Add New Link</h1>
           <p className="text-gray-600">Add a new resource to the 3D navigation</p>
-          <div className="mt-2 px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-md inline-block">
-            🎭 Demo Mode - Changes will not be persisted
+          <div className="mt-2 px-3 py-1 bg-green-100 text-green-800 text-sm rounded-md inline-block">
+            💾 Database Mode - Changes will be saved permanently
           </div>
         </div>
         <Link 

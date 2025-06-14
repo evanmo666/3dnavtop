@@ -60,7 +60,34 @@ export default function LinksPage() {
     try {
       setLoading(true);
       
-      // 使用真实数据源
+      // 从API获取真实数据
+      const response = await fetch('/api/links');
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      
+      const linksData = await response.json();
+      
+      // 转换数据格式以匹配界面需求
+      const formattedLinks = linksData.map((link: any) => ({
+        _id: link._id,
+        title: link.title,
+        url: link.url,
+        category: link.category,
+        subcategory: link.subcategory,
+        featured: link.featured || false,
+        createdAt: link.createdAt
+      }));
+      
+      setLinks(formattedLinks);
+      console.log('从数据库加载链接数据:', formattedLinks.length, '个链接');
+      setLoading(false);
+    } catch (error: any) {
+      console.error('加载链接数据失败:', error);
+      
+      // 如果API失败，回退到静态数据
+      console.log('回退到静态数据源');
       const linksData = allLinks.map(link => ({
         _id: link._id,
         title: link.title,
@@ -72,10 +99,7 @@ export default function LinksPage() {
       }));
       
       setLinks(linksData);
-      console.log('链接数据加载完成:', linksData.length, '个链接');
-      setLoading(false);
-    } catch (error: any) {
-      setError(error.message || 'Failed to fetch links');
+      setError('Using static data - Database connection failed');
       setLoading(false);
     }
   };
@@ -86,14 +110,20 @@ export default function LinksPage() {
     }
     
     try {
-      // 在实际项目中，这里会调用API删除链接
-      // await fetch(`/api/links/${id}`, {
-      //   method: 'DELETE',
-      // });
+      const response = await fetch(`/api/links/${id}`, {
+        method: 'DELETE',
+      });
       
-      // 模拟删除操作
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
+      }
+      
+      // 从列表中移除已删除的链接
       setLinks(links.filter(link => link._id !== id));
+      console.log('链接删除成功');
     } catch (error: any) {
+      console.error('删除链接失败:', error);
       setError(error.message || 'Failed to delete link');
     }
   };
