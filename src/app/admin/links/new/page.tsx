@@ -86,23 +86,24 @@ export default function AddLinkPage() {
       setLoading(true);
       setError('');
       
-      // 提交到API
-      const response = await fetch('/api/links', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
+      // 演示模式：模拟添加链接成功
+      console.log('演示模式 - 模拟添加链接:', formData);
       
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
-        throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
-      }
+      // 模拟API延迟
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
-      const data = await response.json();
+      // 生成新的链接ID
+      const newLinkId = `demo_${Date.now()}`;
+      const newLink = {
+        _id: newLinkId,
+        ...formData,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
       
-      setSuccess('Link added successfully!');
+      console.log('新链接已创建 (演示模式):', newLink);
+      
+      setSuccess('Link added successfully! (Demo Mode - Changes are not persisted)');
       
       // 重置表单
       setFormData({
@@ -118,9 +119,10 @@ export default function AddLinkPage() {
       // 等待几秒后返回到链接列表
       setTimeout(() => {
         router.push('/admin/links');
-      }, 2000);
+      }, 3000);
     } catch (error: any) {
-      setError(error.message);
+      console.error('添加链接失败:', error);
+      setError(`Failed to add link: ${error.message}`);
     } finally {
       setLoading(false);
     }
@@ -132,6 +134,9 @@ export default function AddLinkPage() {
         <div>
           <h1 className="text-3xl font-bold mb-2">Add New Link</h1>
           <p className="text-gray-600">Add a new resource to the 3D navigation</p>
+          <div className="mt-2 px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-md inline-block">
+            🎭 Demo Mode - Changes will not be persisted
+          </div>
         </div>
         <Link 
           href="/admin/links" 
