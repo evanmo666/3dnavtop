@@ -101,22 +101,22 @@ export default function Home() {
           {/* 搜索栏 - 增强视觉效果 */}
           <div className="max-w-2xl mx-auto">
             <div className={`relative transition-all duration-300 ${isSearchFocused ? 'scale-105 shadow-2xl' : 'shadow-xl'}`}>
+              {/* 搜索框发光效果 - 移到input下方避免阻挡点击 */}
+              <div className={`absolute inset-0 rounded-full bg-gradient-to-r from-blue-400/20 to-indigo-400/20 blur-lg transition-opacity duration-300 pointer-events-none ${isSearchFocused ? 'opacity-100' : 'opacity-0'}`}></div>
               <input
                 type="text"
                 placeholder="Search for resources..."
-                className="w-full px-6 py-5 rounded-full text-gray-800 text-lg font-medium focus:outline-none focus:ring-4 focus:ring-white/30 bg-white/95 backdrop-blur-sm border-2 border-white/20 hover:border-white/40 transition-all duration-300"
+                className="relative w-full px-6 py-5 rounded-full text-gray-800 text-lg font-medium focus:outline-none focus:ring-4 focus:ring-white/30 bg-white/95 backdrop-blur-sm border-2 border-white/20 hover:border-white/40 transition-all duration-300 z-10"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 onFocus={() => setIsSearchFocused(true)}
                 onBlur={() => setIsSearchFocused(false)}
               />
-              <div className="absolute right-5 top-1/2 transform -translate-y-1/2 text-blue-500">
+              <div className="absolute right-5 top-1/2 transform -translate-y-1/2 text-blue-500 pointer-events-none z-20">
                 <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
               </div>
-              {/* 搜索框发光效果 */}
-              <div className={`absolute inset-0 rounded-full bg-gradient-to-r from-blue-400/20 to-indigo-400/20 blur-lg transition-opacity duration-300 ${isSearchFocused ? 'opacity-100' : 'opacity-0'}`}></div>
             </div>
           </div>
         </motion.div>
