@@ -717,6 +717,19 @@ export const allLinks: ILink[] = [
     createdAt: new Date(),
     updatedAt: new Date()
   },
+  // 示例：新增链接
+  {
+    _id: '60',
+    title: 'Autodesk Maya',
+    url: 'https://www.autodesk.com/products/maya/',
+    description: 'Professional 3D computer animation, modeling, simulation, and rendering software.',
+    category: 'software',
+    subcategory: 'Professional',
+    featured: true,
+    order: 10,
+    createdAt: new Date(),
+    updatedAt: new Date()
+  },
 ];
 
 // 分类数据
