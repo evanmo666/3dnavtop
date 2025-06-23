@@ -742,6 +742,19 @@ export const allLinks: ILink[] = [
     createdAt: new Date(),
     updatedAt: new Date()
   },
+  // AI对话类别
+  {
+    _id: '62',
+    title: 'MiniMax-M1',
+    url: 'https://minimax-m1.com/',
+    description: 'World\'s first open-source large-scale hybrid attention reasoning model with 456B parameters and 1M token context.',
+    category: 'ai-conversation',
+    subcategory: 'AI Models',
+    featured: true,
+    order: 1,
+    createdAt: new Date(),
+    updatedAt: new Date()
+  },
 ];
 
 // 分类数据
@@ -755,4 +768,5 @@ export const categories = [
   { id: 'inspiration', title: 'Inspiration', icon: '✨' },
   { id: 'audio', title: 'Audio Resources', icon: '🎵' },
   { id: 'video', title: 'Video Resources', icon: '🎬' },
+  { id: 'ai-conversation', title: 'AI Conversation', icon: '🤖' },
 ]; 

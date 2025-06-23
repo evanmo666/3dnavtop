@@ -69,6 +69,13 @@ const categories = [
     description: 'Specialized tools and utilities for 3D designers',
     count: 9,
     slug: 'tools'
+  },
+  {
+    title: 'AI Conversation',
+    icon: '🤖',
+    description: 'AI-powered conversation tools and large language models for creative workflows',
+    count: 1,
+    slug: 'ai-conversation'
   }
 ];
 

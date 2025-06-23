@@ -33,6 +33,11 @@ const categories = {
     icon: '✨',
     description: 'Galleries, showcases and portfolios to inspire your work',
   },
+  'ai-conversation': {
+    title: 'AI Conversation',
+    icon: '🤖',
+    description: 'AI-powered conversation tools and large language models for creative workflows',
+  },
 };
 
 // 模拟链接数据
@@ -160,6 +165,21 @@ const mockLinks = {
       category: 'Inspiration',
       subcategory: 'Portfolio',
       icon: 'inspiration',
+      featured: true,
+      order: 1,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    },
+  ],
+  'ai-conversation': [
+    {
+      _id: '62',
+      title: 'MiniMax-M1',
+      url: 'https://minimax-m1.com/',
+      description: 'World\'s first open-source large-scale hybrid attention reasoning model with 456B parameters and 1M token context.',
+      category: 'AI Conversation',
+      subcategory: 'AI Models',
+      icon: 'ai',
       featured: true,
       order: 1,
       createdAt: new Date(),
